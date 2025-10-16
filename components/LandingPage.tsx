@@ -1,63 +1,64 @@
 import React from 'react';
-import { Wine, Compass, BookOpen, Church, Music, Sparkles } from 'lucide-react';
+import { Utensils, Footprints, Headphones, Eye, BookOpen, Heart } from 'lucide-react';
+import type { CultureCategory } from '../types';
 
 interface LandingPageProps {
-  onNavigate: (destination: 'love-feast' | 'travel-pilgrim' | 'bible-manuscripts' | 'church-aesthetics' | 'music-hymns' | 'soul-spirituality') => void;
+  onNavigate: (destination: CultureCategory) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const features = [
     {
       id: 'love-feast' as const,
-      title: '愛筵與聖餐',
-      subtitle: 'Love Feast & Lord\'s Supper',
-      description: '探索基督教共融傳統：從早期教會的愛筵到聖餐禮的神學意義與實踐',
-      icon: Wine,
-      color: 'from-rose-500 to-rose-700',
-      hoverColor: 'hover:from-rose-600 hover:to-rose-800',
+      title: '吃： 愛筵與主餐',
+      subtitle: 'Eat： Agape Table and Communion',
+      description: '探索聖餐與愛筵的食物：製作方法，體驗共享和意義',
+      icon: Utensils,
+      color: 'from-amber-500 to-amber-700',
+      hoverColor: 'hover:from-amber-600 hover:to-amber-800',
     },
     {
       id: 'travel-pilgrim' as const,
-      title: '旅程與朝聖',
-      subtitle: 'Travel & Pilgrimage',
-      description: '踏上信仰之旅：探訪聖地、朝聖傳統，以及靈性旅程的深刻意義',
-      icon: Compass,
+      title: '行：旅遊與朝聖',
+      subtitle: 'Walk： Travel and Pilgrim Route',
+      description: '探索聖地路線、朝聖之路，了解歷代信徒信仰步道',
+      icon: Footprints,
       color: 'from-blue-500 to-blue-700',
       hoverColor: 'hover:from-blue-600 hover:to-blue-800',
     },
     {
       id: 'music-hymns' as const,
-      title: '音樂與詩歌',
-      subtitle: 'Music & Hymns',
-      description: '聆聽天籟之音：探索聖樂傳統、詩歌創作與敬拜音樂的靈性力量',
-      icon: Music,
-      color: 'from-green-500 to-green-700',
-      hoverColor: 'hover:from-green-600 hover:to-green-800',
-    },
-    {
-      id: 'church-aesthetics' as const,
-      title: '教堂建築與美學',
-      subtitle: 'Church Architecture & Aesthetics',
-      description: '欣賞神聖空間：從哥德式大教堂到現代禮拜堂的建築藝術與神學象徵',
-      icon: Church,
+      title: '聽：音樂與聖樂',
+      subtitle: 'Listen：Church Music and Hythms ',
+      description: '聆聽天籟：聖樂、聖詩、禱告詞與默想音頻的崇拜體驗',
+      icon: Headphones,
       color: 'from-purple-500 to-purple-700',
       hoverColor: 'hover:from-purple-600 hover:to-purple-800',
     },
     {
+      id: 'church-aesthetics' as const,
+      title: '看: 教堂與美學',
+      subtitle: 'See： Church Buildings and Aesthetic',
+      description: '基督教視覺藝術：教堂建築、聖像畫與觸覺神的榮耀',
+      icon: Eye,
+      color: 'from-green-500 to-green-700',
+      hoverColor: 'hover:from-green-600 hover:to-green-800',
+    },
+    {
       id: 'bible-manuscripts' as const,
-      title: '聖經與抄本',
-      subtitle: 'Bible & Manuscripts',
-      description: '深入了解聖經的歷史：古代抄本、翻譯傳統與經文形成的奇妙過程',
+      title: '讀: 聖經與發掘',
+      subtitle: 'Read： Scripture and Discovery',
+      description: '閱讀與想象：聖經抄本、經文文學與研究進入更深領受',
       icon: BookOpen,
-      color: 'from-amber-500 to-amber-700',
-      hoverColor: 'hover:from-amber-600 hover:to-amber-800',
+      color: 'from-r ose-500 to-rose-700',
+      hoverColor: 'hover:from-rose-600 hover:to-rose-800',
     },
     {
       id: 'soul-spirituality' as const,
-      title: '安靜與靈修',
-      subtitle: 'Silence & Spiritual Practice',
-      description: '探索內在生命：靈性操練、默觀祈禱與靈魂成長的屬靈旅程',
-      icon: Sparkles,
+      title: '思： 平靜與靈修',
+      subtitle: 'Meditate： Peace and Spirituality',
+      description: '進入安靜：靈裏探索、默觀祈禱與靈性操練',
+      icon: Heart,
       color: 'from-indigo-500 to-indigo-700',
       hoverColor: 'hover:from-indigo-600 hover:to-indigo-800',
     },
@@ -77,11 +78,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
       <div className="relative z-10">
       <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-          Do you know Christianity?
+        <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-rose-400 to-amber-400 bg-clip-text text-transparent">
+          基督教：一種經驗生活的信仰
         </h1>
+        <h2 className="text-3xl font-semibold mb-4 text-gray-800">
+          Christianity：An Experienced Living Belief
+        </h2>
         <p className="text-xl text-gray-700">
-          基督教 AI 知識平台 - 讓你認識基督教，一個影響著生活的信仰
+          透過六種感官，人工智能的幫助，開啟靈性體驗，探索基督教豐富的文化傳統，了解這信仰
         </p>
       </div>
  
@@ -129,8 +133,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </div>
 
       <div className="mt-16 text-center text-gray-600 text-sm">
-        <p>選擇一個主題，開始您的基督教文化探索之旅</p>
-        <p className="mt-2">Choose a topic to begin your Christian cultural exploration</p>
+        <p>選擇一種體驗方式，開始您的基督教文化探索之旅</p>
+        <p className="mt-2">Choose an experience to begin your Christianity Culture journey</p>
       </div>
       </div>
     </div>

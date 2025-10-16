@@ -6,72 +6,92 @@ export enum AppState {
   ERROR = 'ERROR',
   SAVED = 'SAVED',
   ADMIN = 'ADMIN',
-  LOVE_FEAST = 'LOVE_FEAST',
-  TRAVEL_PILGRIM = 'TRAVEL_PILGRIM',
-  BIBLE_MANUSCRIPTS = 'BIBLE_MANUSCRIPTS',
-  CHURCH_AESTHETICS = 'CHURCH_AESTHETICS',
-  MUSIC_HYMNS = 'MUSIC_HYMNS',
-  SOUL_SPIRITUALITY = 'SOUL_SPIRITUALITY',
+  // Christianity Culture Journey Categories
+  LOVE_FEAST = 'LOVE_FEAST', // eat
+  TRAVEL_PILGRIM = 'TRAVEL_PILGRIM', // walk
+  MUSIC_HYMNS = 'MUSIC_HYMNS', // listen
+  CHURCH_AESTHETICS = 'CHURCH_AESTHETICS', // see
+  BIBLE_MANUSCRIPTS = 'BIBLE_MANUSCRIPTS', // read
+  SOUL_SPIRITUALITY = 'SOUL_SPIRITUALITY', // meditate
 }
 
-export enum AiEngine {
-  GEMINI = 'Google Gemini',
-  LOCAL_LLM = 'Local LLM',
-}
+export type CultureCategory = 'love-feast' | 'travel-pilgrim' | 'music-hymns' | 'church-aesthetics' | 'bible-manuscripts' | 'soul-spirituality';
 
-export enum SermonBasis {
-  BIBLICAL_STUDY = '聖經研究',
-  CHURCH_HISTORY = '教會歷史',
-  SYSTEMATIC_THEOLOGY = '系統神學',
-}
-
-export type SermonLength = 3 | 5 | 10;
-export const SERMON_LENGTH_OPTIONS: SermonLength[] = [3, 5, 10];
-
-export interface SlideContent {
-  title: string;
-  talkingPoints: string[];
-  speakerNotes: string;
-  imagePrompt: string;
-}
-
-export interface GeneratedSlide extends SlideContent {
-  backgroundUrl: string;
-}
-
-export interface GeneratedPresentation {
-  slides: GeneratedSlide[];
-  speakerImageUrl: string;
-  audienceImageUrl: string;
-  fullScript: string;
-  summary: string;
-}
-
-export interface SavedPresentation extends GeneratedPresentation {
+// Love Feast & Lord's Supper App Types
+export interface Recipe {
   id: string;
-  topic: string;
-  savedAt: string;
+  name: string;
+  nameEn: string;
+  description: string;
+  ingredients: string[];
+  instructions: string[];
+  biblicalContext: string;
+  imageUrl?: string;
+  category: 'bread' | 'wine' | 'early-church' | 'traditional';
 }
 
-export interface SystemPromptConfig {
-  personaEnabled: boolean;
-  ethics: 'principled' | 'pragmatic' | 'neutral';
-  politicalStand: 'neutral' | 'centrist' | 'left-leaning' | 'right-leaning';
-  powerfulness: 'subtle' | 'direct' | 'authoritative';
-  sentiment: 'optimistic' | 'neutral' | 'realistic' | 'pessimistic';
-  personality: string;
-  empathy: 'low' | 'medium' | 'high';
+export interface WalkRoute {
+  id: string;
+  name: string;
+  nameEn: string;
+  description: string;
+  location: string;
+  duration: string;
+  difficulty: 'easy' | 'moderate' | 'challenging';
+  biblicalSignificance: string;
+  waypoints: { name: string; description: string }[];
+  mapUrl?: string;
 }
 
-export const DEFAULT_SYSTEM_PROMPT_CONFIG: SystemPromptConfig = {
-  personaEnabled: true,
-  ethics: 'principled',
-  politicalStand: 'neutral',
-  powerfulness: 'direct',
-  sentiment: 'optimistic',
-  personality: 'An insightful and engaging AI assistant, expert in theology and communication.',
-  empathy: 'medium',
-};
+export interface AudioContent {
+  id: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  type: 'hymn' | 'chant' | 'sermon' | 'prayer' | 'meditation';
+  audioUrl: string;
+  duration: string;
+  transcript?: string;
+  background: string;
+}
+
+export interface VisualContent {
+  id: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  type: 'painting' | 'icon' | 'sculpture' | 'architecture' | 'manuscript';
+  imageUrl: string;
+  artist?: string;
+  period: string;
+  biblicalReference: string;
+  interpretation: string;
+}
+
+export interface ReadingContent {
+  id: string;
+  title: string;
+  titleEn: string;
+  author: string;
+  excerpt: string;
+  fullText?: string;
+  type: 'scripture' | 'liturgy' | 'theology' | 'devotional' | 'historical';
+  period: string;
+  context: string;
+  reflection: string;
+}
+
+export interface MeditationGuide {
+  id: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  type: 'lectio-divina' | 'contemplative' | 'ignatian' | 'centering-prayer';
+  duration: string;
+  steps: { title: string; instruction: string; duration: string }[];
+  scriptureBase?: string;
+  guidance: string;
+}
 
 // Bible Game Types
 export enum BibleVersion {
@@ -320,3 +340,70 @@ export interface SermonGenerationState {
   temperature: number;
   topP: number;
 }
+
+// AI Engine Types
+export enum AiEngine {
+  GEMINI = 'Gemini',
+  LOCAL_LLM = 'Local LLM'
+}
+
+// Sermon Types
+export enum SermonBasis {
+  BIBLICAL_STUDY = 'biblical-study',
+  CHURCH_HISTORY = 'church-history',
+  SYSTEMATIC_THEOLOGY = 'systematic-theology'
+}
+
+export enum SermonLength {
+  THREE_MIN = 3,
+  FIVE_MIN = 5,
+  TEN_MIN = 10
+}
+
+export const SERMON_LENGTH_OPTIONS = [
+  { value: SermonLength.THREE_MIN, label: '3 分鐘' },
+  { value: SermonLength.FIVE_MIN, label: '5 分鐘' },
+  { value: SermonLength.TEN_MIN, label: '10 分鐘' }
+];
+
+// Sermon Presentation Types
+export interface SlideContent {
+  title: string;
+  talkingPoints: string[];
+  speakerNotes: string;
+  imagePrompt: string;
+}
+
+export interface GeneratedSlide extends SlideContent {
+  backgroundUrl: string;
+}
+
+export interface GeneratedPresentation {
+  slides: GeneratedSlide[];
+  fullScript: string;
+  summary: string;
+  speakerHeadshotUrl?: string;
+  audienceImageUrl?: string;
+}
+
+export interface SavedPresentation extends GeneratedPresentation {
+  id: string;
+  topic: string;
+  savedAt: string;
+}
+
+export interface SystemPromptConfig {
+  enabled: boolean;
+  ethicalStance: string;
+  politicalStance: string;
+  tone: string;
+  empathyLevel: string;
+}
+
+export const DEFAULT_SYSTEM_PROMPT_CONFIG: SystemPromptConfig = {
+  enabled: false,
+  ethicalStance: 'neutral',
+  politicalStance: 'neutral',
+  tone: 'balanced',
+  empathyLevel: 'moderate'
+};

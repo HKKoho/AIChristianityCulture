@@ -1,7 +1,7 @@
 {
-  "name": "ai講道稿生成",
+  "name": "christianity-culture-journey",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

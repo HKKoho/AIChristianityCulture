@@ -6,9 +6,15 @@ import { ResultDisplay } from './components/ResultDisplay';
 import { SavedPresentations } from './components/SavedPresentations';
 import { AdminPanel } from './components/AdminPanel';
 import { LandingPage } from './components/LandingPage';
+import { Eat } from './components/Eat';
+import { Walk } from './components/Walk';
+import { Listen } from './components/Listen';
+import { See } from './components/See';
+import { ReadContent } from './components/ReadContent';
+import { Meditate } from './components/Meditate';
 import { generatePresentation as generateWithGemini } from './services/geminiService';
 import { generatePresentation as generateWithLocalLLM } from './services/localLLMService';
-import type { GeneratedPresentation, SavedPresentation, SystemPromptConfig, SermonBasis, SermonLength } from './types';
+import type { GeneratedPresentation, SavedPresentation, SystemPromptConfig, SermonBasis, SermonLength, CultureCategory } from './types';
 import { AppState, AiEngine, DEFAULT_SYSTEM_PROMPT_CONFIG } from './types';
 
 const App: React.FC = () => {
@@ -83,7 +89,7 @@ const App: React.FC = () => {
     setCurrentTopic('');
   };
 
-  const handleNavigateFromLanding = (destination: 'love-feast' | 'travel-pilgrim' | 'bible-manuscripts' | 'church-aesthetics' | 'music-hymns' | 'soul-spirituality') => {
+  const handleNavigateFromLanding = (destination: CultureCategory) => {
     switch (destination) {
       case 'love-feast':
         setAppState(AppState.LOVE_FEAST);
@@ -145,17 +151,17 @@ const App: React.FC = () => {
       case AppState.LANDING:
         return <LandingPage onNavigate={handleNavigateFromLanding} />;
       case AppState.LOVE_FEAST:
-        return <div className="text-center p-8"><h2 className="text-3xl font-bold mb-4">愛筵與聖餐</h2><p className="text-gray-600">Coming soon...</p><button onClick={handleBackToLanding} className="mt-4 px-6 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-md transition-colors">返回首頁</button></div>;
+        return <Eat onBack={handleBackToLanding} />;
       case AppState.TRAVEL_PILGRIM:
-        return <div className="text-center p-8"><h2 className="text-3xl font-bold mb-4">旅程與朝聖</h2><p className="text-gray-600">Coming soon...</p><button onClick={handleBackToLanding} className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">返回首頁</button></div>;
-      case AppState.BIBLE_MANUSCRIPTS:
-        return <div className="text-center p-8"><h2 className="text-3xl font-bold mb-4">聖經與抄本</h2><p className="text-gray-600">Coming soon...</p><button onClick={handleBackToLanding} className="mt-4 px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-md transition-colors">返回首頁</button></div>;
-      case AppState.CHURCH_AESTHETICS:
-        return <div className="text-center p-8"><h2 className="text-3xl font-bold mb-4">教堂建築與美學</h2><p className="text-gray-600">Coming soon...</p><button onClick={handleBackToLanding} className="mt-4 px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors">返回首頁</button></div>;
+        return <Walk onBack={handleBackToLanding} />;
       case AppState.MUSIC_HYMNS:
-        return <div className="text-center p-8"><h2 className="text-3xl font-bold mb-4">音樂與詩歌</h2><p className="text-gray-600">Coming soon...</p><button onClick={handleBackToLanding} className="mt-4 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors">返回首頁</button></div>;
+        return <Listen onBack={handleBackToLanding} />;
+      case AppState.CHURCH_AESTHETICS:
+        return <See onBack={handleBackToLanding} />;
+      case AppState.BIBLE_MANUSCRIPTS:
+        return <ReadContent onBack={handleBackToLanding} />;
       case AppState.SOUL_SPIRITUALITY:
-        return <div className="text-center p-8"><h2 className="text-3xl font-bold mb-4">安靜與靈修</h2><p className="text-gray-600">Coming soon...</p><button onClick={handleBackToLanding} className="mt-4 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors">返回首頁</button></div>;
+        return <Meditate onBack={handleBackToLanding} />;
       case AppState.LOADING:
         return <LoadingScreen message={loadingMessage} />;
       case AppState.RESULT:

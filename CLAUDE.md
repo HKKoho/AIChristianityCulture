@@ -4,9 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an AI-powered Christian sermon generator built with React, TypeScript, and Vite. The application generates complete sermons with presentation slides, visual materials, and speaker notes based on user-specified topics, theological foundations, and key points.
+This is an interactive Christianity Culture exploration platform built with React, TypeScript, and Vite. The application provides an immersive journey through Christian cultural traditions via six experiential categories: eating, walking, listening, seeing, reading, and meditating.
 
-**Chinese Name:** AI講道稿生成 (AI Sermon Generator)
+**Chinese Name:** 基督教文化體驗之旅 (Christianity Culture - An Experienced Journey)
+**English Name:** Christianity Culture - An Experienced Journey
+
+## Six Culture Categories
+
+The application is structured around six experiential pathways to explore Christian culture:
+
+1. **Love-Feast (吃 - Eat)**: Explores communion, agape feasts, and Christian food traditions. Features recipes, biblical contexts, and the theological significance of bread and wine.
+
+2. **Travel-Pilgrim (走 - Walk)**: Journey through pilgrimage routes and holy sites. Includes walking paths like the Road to Emmaus, Last Supper locations, and Jerusalem pilgrimage routes.
+
+3. **Music-Hymns (聽 - Listen)**: Experience sacred music, hymns, chants, and meditative audio. Features classic hymns like Amazing Grace, Gregorian chants, and contemplative meditation music.
+
+4. **Church-Aesthetics (看 - See)**: Visual exploration of Christian art, architecture, icons, and manuscripts. Includes masterpieces like The Last Supper, Christ Pantocrator, and Gothic cathedrals.
+
+5. **Bible-Manuscripts (讀 - Read)**: Reading ancient biblical manuscripts, theological texts, and devotional literature. Features Dead Sea Scrolls, Augustine's Confessions, and early church liturgy.
+
+6. **Soul-Spirituality (冥想 - Meditate)**: Guided spiritual practices including Lectio Divina, Centering Prayer, and Ignatian contemplation. Interactive step-by-step meditation guides.
 
 ## Development Commands
 

@@ -1,0 +1,193 @@
+import React, { useState } from 'react';
+import { ArrowLeft, Utensils, ChefHat, Book } from 'lucide-react';
+import type { Recipe } from '../types';
+
+interface EatProps {
+  onBack: () => void;
+}
+
+export const Eat: React.FC<EatProps> = ({ onBack }) => {
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+
+  const recipes: Recipe[] = [
+    {
+      id: '1',
+      name: '無酵餅',
+      nameEn: 'Unleavened Bread',
+      description: '傳統逾越節與聖餐使用的無酵餅，象徵著純潔與迅速的救贖。',
+      ingredients: [
+        '2 杯中筋麵粉',
+        '1/2 茶匙鹽',
+        '2/3 杯水',
+        '2 湯匙橄欖油'
+      ],
+      instructions: [
+        '將麵粉和鹽混合在一個大碗中',
+        '加入水和橄欖油，攪拌成麵團',
+        '揉麵團約 5 分鐘直到光滑',
+        '將麵團分成小塊，擀成薄片',
+        '用叉子在麵團上戳洞',
+        '在預熱 230°C 的烤箱中烤 8-10 分鐘至金黃色'
+      ],
+      biblicalContext: '出埃及記 12:15-20 記載了以色列人在逾越節吃無酵餅的命令。這象徵著他們匆忙離開埃及，沒有時間讓麵包發酵。在聖餐中，無酵餅代表基督無罪的身體。',
+      category: 'bread'
+    },
+    {
+      id: '2',
+      name: '聖餐葡萄汁',
+      nameEn: 'Communion Grape Juice',
+      description: '代表基督寶血的葡萄汁，在聖餐中使用。',
+      ingredients: [
+        '2 公斤新鮮葡萄',
+        '1/4 杯蜂蜜（可選）',
+        '少許檸檬汁'
+      ],
+      instructions: [
+        '將葡萄洗淨，去除莖部',
+        '將葡萄放入果汁機或壓榨器中',
+        '用細網過濾葡萄汁，去除皮和籽',
+        '如果需要，加入蜂蜜調味',
+        '加入少許檸檬汁以防氧化',
+        '冷藏保存，使用前搖勻'
+      ],
+      biblicalContext: '馬太福音 26:27-29 記載了耶穌設立聖餐時說：「這是我立約的血。」葡萄汁（或葡萄酒）象徵基督為我們流出的寶血，帶來罪的赦免和新的約。',
+      category: 'wine'
+    },
+    {
+      id: '3',
+      name: '愛筵餐點',
+      nameEn: 'Agape Feast Meal',
+      description: '早期教會愛筵的傳統餐點，強調共融與分享。',
+      ingredients: [
+        '麵包（多種）',
+        '橄欖油和香草',
+        '羊乳酪',
+        '烤蔬菜',
+        '扁豆湯',
+        '無花果和蜜棗',
+        '葡萄酒或葡萄汁'
+      ],
+      instructions: [
+        '準備多種麵包：全麥、大麥、無酵餅',
+        '製作香草橄欖油：混合橄欖油、迷迭香、百里香',
+        '準備羊乳酪拼盤',
+        '烤製蔬菜：茄子、櫛瓜、彩椒',
+        '煮扁豆湯：扁豆、洋蔥、香料',
+        '擺盤無花果和蜜棗作為甜點',
+        '準備葡萄酒或葡萄汁供大家享用'
+      ],
+      biblicalContext: '猶大書 1:12 提到「愛筵」，指的是早期基督徒聚會時的共同用餐。這種做法源於使徒行傳 2:46 描述的「在家中擘餅」，強調信徒之間的共融和彼此相愛。',
+      category: 'early-church'
+    }
+  ];
+
+  if (selectedRecipe) {
+    return (
+      <div className="w-full max-w-4xl mx-auto p-6">
+        <button
+          onClick={() => setSelectedRecipe(null)}
+          className="flex items-center gap-2 text-amber-600 hover:text-amber-700 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          返回食譜列表
+        </button>
+
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-amber-500 to-amber-700 p-8 text-white">
+            <div className="flex items-center gap-3 mb-2">
+              <ChefHat className="w-8 h-8" />
+              <h1 className="text-4xl font-bold">{selectedRecipe.name}</h1>
+            </div>
+            <p className="text-xl opacity-90">{selectedRecipe.nameEn}</p>
+          </div>
+
+          <div className="p-8">
+            <p className="text-lg text-gray-700 mb-6">{selectedRecipe.description}</p>
+
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Book className="w-6 h-6 text-amber-600" />
+                <h2 className="text-2xl font-bold text-gray-800">聖經背景</h2>
+              </div>
+              <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded">
+                <p className="text-gray-700 leading-relaxed">{selectedRecipe.biblicalContext}</p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">材料</h2>
+                <ul className="space-y-2">
+                  {selectedRecipe.ingredients.map((ingredient, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-amber-600 mt-1">•</span>
+                      <span className="text-gray-700">{ingredient}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">製作步驟</h2>
+                <ol className="space-y-3">
+                  {selectedRecipe.instructions.map((instruction, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <span className="flex-shrink-0 w-6 h-6 bg-amber-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                        {index + 1}
+                      </span>
+                      <span className="text-gray-700 pt-0.5">{instruction}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-6xl mx-auto p-6">
+      <button
+        onClick={onBack}
+        className="flex items-center gap-2 text-amber-600 hover:text-amber-700 mb-6 transition-colors"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        返回首頁
+      </button>
+
+      <div className="text-center mb-12">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <Utensils className="w-12 h-12 text-amber-600" />
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-amber-500 to-amber-700 bg-clip-text text-transparent">
+            吃
+          </h1>
+        </div>
+        <h2 className="text-3xl font-semibold mb-4 text-gray-800">Eat</h2>
+        <p className="text-xl text-gray-600">
+          探索聖餐與愛筵的食物傳統
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {recipes.map((recipe) => (
+          <button
+            key={recipe.id}
+            onClick={() => setSelectedRecipe(recipe)}
+            className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group"
+          >
+            <div className="bg-gradient-to-br from-amber-500 to-amber-700 p-6 text-white">
+              <ChefHat className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
+              <h3 className="text-2xl font-bold mb-1">{recipe.name}</h3>
+              <p className="text-amber-100">{recipe.nameEn}</p>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-600 line-clamp-3">{recipe.description}</p>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
