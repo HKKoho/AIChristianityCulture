@@ -1,0 +1,7 @@
+{
+  "name": "Biblical Pronunciation Coach",
+  "description": "An interactive game to help you learn and practice the pronunciation of Biblical Hebrew and Greek words and phrases using AI feedback.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="AI Christianity Platform - Biblical Language Learning with pronunciation practice" />
+    <!-- Permissions Policy for microphone and speaker -->
+    <meta http-equiv="Permissions-Policy" content="microphone=(self), speaker=(self)" />
+    <title>數位講壇</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Widget JavaScript bundle -->
+    <script src="https://cloud.google.com/ai/gen-app-builder/client?hl=en_US"></script>
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+
+<link rel="stylesheet" href="/index.css">
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.22.0"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/assets/index-D7-bfS1p.js"></script>
+</head>
+  <body class="bg-gray-900 text-white">
+    <div id="root"></div>
+    <!-- Search widget element is not visible by default -->
+    <gen-search-widget
+      configId="a1591f79-ec4a-4b7a-9291-494f9a28483f"
+      triggerId="searchWidgetTrigger">
+    </gen-search-widget>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  </body>
+</html>
