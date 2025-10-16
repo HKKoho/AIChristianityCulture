@@ -82,7 +82,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           基督教：一種經驗生活的信仰
         </h1>
         <h2 className="text-3xl font-semibold mb-4 text-gray-800">
-          Christianity：An Experienced Living Belief
+          Christianity：An Experiencing Living Belief
         </h2>
         <p className="text-xl text-gray-700">
           透過六種感官，人工智能的幫助，開啟靈性體驗，探索基督教豐富的文化傳統，了解這信仰
