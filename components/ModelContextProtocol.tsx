@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { ImageIcon, FileText, Upload, AlertTriangle } from 'lucide-react';
+import { ImageIcon, FileText, Upload, AlertTriangle, Volume2, StopCircle } from 'lucide-react';
 import { analyzeImage, analyzeText } from '../services/geminiChatService';
 
 type AnalysisType = 'image' | 'text';
@@ -29,6 +29,8 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
   const [result, setResult] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 
   const getCategoryContext = () => {
     switch (category) {
@@ -63,20 +65,22 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
     }
   };
 
-  const handleAnalysis = useCallback(async () => {
+  const handleAnalysis = useCallback(async (expanded: boolean = false) => {
     setIsLoading(true);
     setError('');
     setResult('');
+    setIsExpanded(expanded);
 
     try {
       let analysisResult = '';
       const context = getCategoryContext();
+      const wordLimit = expanded ? 500 : 100;
 
       if (analysisType === 'image' && imageFile) {
         const { data, mimeType } = await fileToBase64(imageFile);
-        analysisResult = await analyzeImage(data, mimeType, context);
+        analysisResult = await analyzeImage(data, mimeType, context, wordLimit);
       } else if (analysisType === 'text' && inputText.trim()) {
-        analysisResult = await analyzeText(inputText, context);
+        analysisResult = await analyzeText(inputText, context, wordLimit);
       } else {
         setError('請提供分析的輸入內容');
         setIsLoading(false);
@@ -90,6 +94,45 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
       setIsLoading(false);
     }
   }, [analysisType, imageFile, inputText, category]);
+
+  const handleExpand = useCallback(async () => {
+    await handleAnalysis(true);
+  }, [handleAnalysis]);
+
+  const speakText = useCallback((text: string) => {
+    if (!('speechSynthesis' in window)) {
+      setError('您的瀏覽器不支援語音播放功能');
+      return;
+    }
+
+    // Stop any ongoing speech
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'zh-TW';
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+    };
+
+    utterance.onend = () => {
+      setIsSpeaking(false);
+    };
+
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      setError('語音播放失敗');
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const stopSpeaking = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+  }, []);
 
   const canAnalyze = (analysisType === 'image' && imageFile) || (analysisType === 'text' && inputText.trim());
 
@@ -204,7 +247,27 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
       {/* Results Area */}
       {(isLoading || error || result) && (
         <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto animate-fade-in">
-          <h3 className="text-2xl font-bold mb-4 text-center text-gray-800">分析結果</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-2xl font-bold text-gray-800">
+              分析結果
+              {result && !isExpanded && (
+                <span className="text-sm font-normal text-gray-500 ml-2">(限 100 字)</span>
+              )}
+            </h3>
+            {result && (
+              <button
+                onClick={isSpeaking ? stopSpeaking : () => speakText(result)}
+                className={`p-2 rounded-lg transition-colors ${
+                  isSpeaking
+                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                    : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                }`}
+                title={isSpeaking ? '停止播放' : '朗讀結果'}
+              >
+                {isSpeaking ? <StopCircle className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              </button>
+            )}
+          </div>
           {isLoading && (
             <div className="flex justify-center p-8">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
@@ -217,9 +280,21 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
             </div>
           )}
           {result && (
-            <div className="prose prose-lg max-w-none text-gray-700">
-              <div className="whitespace-pre-wrap">{result}</div>
-            </div>
+            <>
+              <div className="prose prose-lg max-w-none text-gray-700">
+                <div className="whitespace-pre-wrap">{result}</div>
+              </div>
+              {!isExpanded && (
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={handleExpand}
+                    className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                  >
+                    展開更多詳情 (500 字)
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

@@ -8,7 +8,7 @@ if (API_KEY) {
   ai = new GoogleGenAI({ apiKey: API_KEY });
 }
 
-export const createChatSession = (): Chat | null => {
+export const createChatSession = (wordLimit: number = 100): Chat | null => {
   if (!ai) {
     console.warn('Gemini API key not configured');
     return null;
@@ -28,6 +28,8 @@ Your expertise covers:
 - Christian meditation, contemplative prayer, and spiritual practices
 
 You are knowledgeable, respectful, and culturally sensitive. Answer questions with historical accuracy, theological depth, and pastoral wisdom. Use markdown for formatting when appropriate. Always be helpful and encouraging in exploring the richness of Christian cultural heritage.
+
+IMPORTANT: Limit each response to approximately ${wordLimit} words unless the user explicitly asks for more details or a longer explanation. Be concise and focused on the most essential information.
 
 Respond primarily in Traditional Chinese (繁體中文) unless the user writes in English.`,
     },
@@ -52,7 +54,8 @@ export const isServiceAvailable = (): boolean => {
 export const analyzeImage = async (
   imageBase64: string,
   mimeType: string,
-  categoryContext?: string
+  categoryContext?: string,
+  wordLimit: number = 100
 ): Promise<string> => {
   if (!ai) {
     throw new Error('Gemini API not configured. Please set GEMINI_API_KEY environment variable.');
@@ -70,7 +73,11 @@ export const analyzeImage = async (
     : 'Analyze this image for its cultural and historical context in Christianity.';
 
   const textPart = {
-    text: `${contextPrompt} Describe any rituals, symbols, art, architecture, or historical significance you can identify. Explain their theological meaning and cultural importance. Present your findings in a clear, structured format using markdown. Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.`,
+    text: `${contextPrompt}
+
+IMPORTANT: Limit your response to approximately ${wordLimit} words. Be concise and focused.
+
+Briefly describe key rituals, symbols, art, architecture, or historical significance. Explain their theological meaning and cultural importance. Present your findings in a clear format using markdown. Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.`,
   };
 
   const response = await ai.models.generateContent({
@@ -81,7 +88,7 @@ export const analyzeImage = async (
   return response.text;
 };
 
-export const analyzeText = async (text: string, categoryContext?: string): Promise<string> => {
+export const analyzeText = async (text: string, categoryContext?: string, wordLimit: number = 100): Promise<string> => {
   if (!ai) {
     throw new Error('Gemini API not configured. Please set GEMINI_API_KEY environment variable.');
   }
@@ -92,13 +99,15 @@ export const analyzeText = async (text: string, categoryContext?: string): Promi
 
   const prompt = `${contextPrompt}
 
-Identify relevant:
+IMPORTANT: Limit your response to approximately ${wordLimit} words. Be concise and focused.
+
+Briefly identify the most relevant:
 - Biblical references and theological concepts
 - Historical periods, events, or figures
 - Cultural practices and traditions
 - Symbolic meanings and spiritual significance
 
-Explain their importance and connections to Christian faith and practice. Present your findings in a clear, structured format using markdown.
+Explain their key importance and connections to Christian faith and practice. Present findings concisely using markdown.
 
 Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.
 
@@ -126,7 +135,7 @@ export interface SearchResult {
   sources: GroundingChunk[];
 }
 
-export const performSearch = async (query: string, categoryContext?: string): Promise<SearchResult> => {
+export const performSearch = async (query: string, categoryContext?: string, wordLimit: number = 100): Promise<SearchResult> => {
   if (!ai) {
     throw new Error('Gemini API not configured. Please set GEMINI_API_KEY environment variable.');
   }
@@ -135,7 +144,11 @@ export const performSearch = async (query: string, categoryContext?: string): Pr
     ? `Regarding the cultural or historical context of ${categoryContext}, answer the following question: "${query}".`
     : `Regarding Christian cultural and historical context, answer the following question: "${query}".`;
 
-  const fullQuery = `${contextPrompt} Provide a comprehensive answer with historical details, theological significance, and cultural context. Use markdown for formatting. Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.`;
+  const fullQuery = `${contextPrompt}
+
+IMPORTANT: Limit your response to approximately ${wordLimit} words. Be concise and focused on the most essential information.
+
+Provide a brief answer with key historical details, theological significance, and cultural context. Use markdown for formatting. Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',

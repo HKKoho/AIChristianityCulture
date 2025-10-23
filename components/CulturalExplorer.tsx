@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { Chat } from '@google/genai';
-import { MessageCircle, X, Send, User, Bot, Loader } from 'lucide-react';
+import { MessageCircle, X, Send, User, Bot, Loader, Mic, Volume2, StopCircle } from 'lucide-react';
 import { createChatSession, sendChatMessage } from '../services/geminiChatService';
 
 interface ChatMessage {
@@ -18,8 +18,12 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [wordLimit, setWordLimit] = useState<number>(100);
+  const [isListening, setIsListening] = useState<boolean>(false);
+  const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
   const chatRef = useRef<Chat | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   const categoryConfig = {
     eat: {
@@ -73,17 +77,17 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
   }, [messages]);
 
   const initializeChat = useCallback(() => {
-    const chat = createChatSession();
+    const chat = createChatSession(wordLimit);
     if (!chat) return;
 
     chatRef.current = chat;
     setMessages([
       {
         role: 'model',
-        content: config.greeting
+        content: config.greeting + '\n\n註：回應限制在 100 字以內。如需更詳細的說明，請明確要求「更多詳情」。'
       }
     ]);
-  }, [config.greeting]);
+  }, [config.greeting, wordLimit]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading || !chatRef.current) return;
@@ -125,6 +129,82 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
       handleSend();
     }
   };
+
+  const startListening = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('您的瀏覽器不支援語音識別功能');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'zh-TW';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  }, []);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  }, []);
+
+  const speakMessage = useCallback((text: string, index: number) => {
+    if (!('speechSynthesis' in window)) {
+      alert('您的瀏覽器不支援語音播放功能');
+      return;
+    }
+
+    // Stop any ongoing speech
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'zh-TW';
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+
+    utterance.onstart = () => {
+      setSpeakingIndex(index);
+    };
+
+    utterance.onend = () => {
+      setSpeakingIndex(null);
+    };
+
+    utterance.onerror = () => {
+      setSpeakingIndex(null);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const stopSpeaking = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setSpeakingIndex(null);
+  }, []);
 
   return (
     <>
@@ -177,14 +257,29 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
                       <Bot className="w-5 h-5 text-white" />
                     </div>
                   )}
-                  <div
-                    className={`max-w-[75%] p-3 rounded-lg shadow whitespace-pre-wrap ${
-                      msg.role === 'user'
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-br-none'
-                        : 'bg-white text-gray-800 rounded-bl-none border border-gray-200'
-                    }`}
-                  >
-                    {msg.content}
+                  <div className="flex flex-col gap-2 max-w-[75%]">
+                    <div
+                      className={`p-3 rounded-lg shadow whitespace-pre-wrap ${
+                        msg.role === 'user'
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-br-none'
+                          : 'bg-white text-gray-800 rounded-bl-none border border-gray-200'
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                    {msg.role === 'model' && (
+                      <button
+                        onClick={speakingIndex === index ? stopSpeaking : () => speakMessage(msg.content, index)}
+                        className={`self-start p-1.5 rounded-md transition-colors ${
+                          speakingIndex === index
+                            ? 'bg-red-500 hover:bg-red-600 text-white'
+                            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                        }`}
+                        title={speakingIndex === index ? '停止播放' : '朗讀訊息'}
+                      >
+                        {speakingIndex === index ? <StopCircle className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                      </button>
+                    )}
                   </div>
                   {msg.role === 'user' && (
                     <div className="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0 flex items-center justify-center">
@@ -217,11 +312,22 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
                   onKeyPress={handleKeyPress}
                   placeholder="詢問文化探索助手..."
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={isLoading}
+                  disabled={isLoading || isListening}
                 />
                 <button
+                  onClick={isListening ? stopListening : startListening}
+                  className={`p-3 rounded-lg transition-all ${
+                    isListening
+                      ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
+                      : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                  }`}
+                  title={isListening ? '停止錄音' : '語音輸入'}
+                >
+                  {isListening ? <StopCircle className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                </button>
+                <button
                   onClick={handleSend}
-                  disabled={!input.trim() || isLoading}
+                  disabled={!input.trim() || isLoading || isListening}
                   className="p-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   <Send className="w-5 h-5" />
