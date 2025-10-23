@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Eye, Image as ImageIcon } from 'lucide-react';
 import type { VisualContent } from '../types';
+import { AISearch } from './AISearch';
+import { CulturalExplorer } from './CulturalExplorer';
+import { ModelContextProtocol } from './ModelContextProtocol';
 
 interface SeeProps {
   onBack: () => void;
@@ -106,116 +109,126 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
 
   if (selectedVisual) {
     return (
-      <div className="w-full max-w-4xl mx-auto p-6">
-        <button
-          onClick={() => setSelectedVisual(null)}
-          className="flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回藝術列表
-        </button>
+      <>
+        <div className="w-full max-w-4xl mx-auto p-6">
+          <button
+            onClick={() => setSelectedVisual(null)}
+            className="flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            返回藝術列表
+          </button>
 
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-green-500 to-green-700 p-8 text-white">
-            <div className="flex items-center gap-3 mb-2">
-              <ImageIcon className="w-8 h-8" />
-              <h1 className="text-4xl font-bold">{selectedVisual.title}</h1>
-            </div>
-            <p className="text-xl opacity-90">{selectedVisual.titleEn}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="px-3 py-1 rounded-full text-sm font-semibold bg-white/20">
-                {getTypeLabel(selectedVisual.type)}
-              </span>
-              {selectedVisual.artist && (
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="bg-gradient-to-r from-green-500 to-green-700 p-8 text-white">
+              <div className="flex items-center gap-3 mb-2">
+                <ImageIcon className="w-8 h-8" />
+                <h1 className="text-4xl font-bold">{selectedVisual.title}</h1>
+              </div>
+              <p className="text-xl opacity-90">{selectedVisual.titleEn}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
                 <span className="px-3 py-1 rounded-full text-sm font-semibold bg-white/20">
-                  {selectedVisual.artist}
+                  {getTypeLabel(selectedVisual.type)}
                 </span>
-              )}
-            </div>
-          </div>
-
-          <div className="p-8">
-            <p className="text-lg text-gray-700 mb-6">{selectedVisual.description}</p>
-
-            {/* Image Placeholder */}
-            <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center mb-6">
-              <div className="text-center">
-                <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">圖像待添加</p>
-                <p className="text-sm text-gray-400">{selectedVisual.imageUrl}</p>
+                {selectedVisual.artist && (
+                  <span className="px-3 py-1 rounded-full text-sm font-semibold bg-white/20">
+                    {selectedVisual.artist}
+                  </span>
+                )}
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h3 className="font-bold text-gray-800 mb-2">時期</h3>
-                <p className="text-gray-700">{selectedVisual.period}</p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h3 className="font-bold text-gray-800 mb-2">聖經出處</h3>
-                <p className="text-gray-700">{selectedVisual.biblicalReference}</p>
-              </div>
-            </div>
+            <div className="p-8">
+              <p className="text-lg text-gray-700 mb-6">{selectedVisual.description}</p>
 
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">藝術詮釋與神學意義</h2>
-              <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
-                <p className="text-gray-700 leading-relaxed">{selectedVisual.interpretation}</p>
+              {/* Image Placeholder */}
+              <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center mb-6">
+                <div className="text-center">
+                  <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-2" />
+                  <p className="text-gray-500">圖像待添加</p>
+                  <p className="text-sm text-gray-400">{selectedVisual.imageUrl}</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="font-bold text-gray-800 mb-2">時期</h3>
+                  <p className="text-gray-700">{selectedVisual.period}</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="font-bold text-gray-800 mb-2">聖經出處</h3>
+                  <p className="text-gray-700">{selectedVisual.biblicalReference}</p>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">藝術詮釋與神學意義</h2>
+                <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                  <p className="text-gray-700 leading-relaxed">{selectedVisual.interpretation}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+        <AISearch category="see" />
+        <CulturalExplorer category="see" />
+        <ModelContextProtocol category="see" />
+      </>
     );
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        返回首頁
-      </button>
+    <>
+      <div className="w-full max-w-6xl mx-auto p-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          返回首頁
+        </button>
 
-      <div className="text-center mb-12">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <Eye className="w-12 h-12 text-green-600" />
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-green-500 to-green-700 bg-clip-text text-transparent">
-            看
-          </h1>
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Eye className="w-12 h-12 text-green-600" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-green-500 to-green-700 bg-clip-text text-transparent">
+              看
+            </h1>
+          </div>
+          <h2 className="text-3xl font-semibold mb-4 text-gray-800">See</h2>
+          <p className="text-xl text-gray-600">
+            看見神的榮耀：教堂建築、聖像畫與基督教視覺藝術
+          </p>
         </div>
-        <h2 className="text-3xl font-semibold mb-4 text-gray-800">See</h2>
-        <p className="text-xl text-gray-600">
-          看見神的榮耀：教堂建築、聖像畫與基督教視覺藝術
-        </p>
-      </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {visualContents.map((visual) => (
-          <button
-            key={visual.id}
-            onClick={() => setSelectedVisual(visual)}
-            className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group text-left"
-          >
-            <div className="bg-gradient-to-br from-green-500 to-green-700 p-6 text-white">
-              <Eye className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="text-2xl font-bold mb-1">{visual.title}</h3>
-              <p className="text-green-100">{visual.titleEn}</p>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-600 mb-4 line-clamp-2">{visual.description}</p>
-              <div className="flex items-center justify-between">
-                <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(visual.type)}`}>
-                  {getTypeLabel(visual.type)}
-                </span>
-                <span className="text-sm text-gray-500">{visual.period.split('(')[0].trim()}</span>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {visualContents.map((visual) => (
+            <button
+              key={visual.id}
+              onClick={() => setSelectedVisual(visual)}
+              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group text-left"
+            >
+              <div className="bg-gradient-to-br from-green-500 to-green-700 p-6 text-white">
+                <Eye className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
+                <h3 className="text-2xl font-bold mb-1">{visual.title}</h3>
+                <p className="text-green-100">{visual.titleEn}</p>
               </div>
-            </div>
-          </button>
-        ))}
+              <div className="p-6">
+                <p className="text-gray-600 mb-4 line-clamp-2">{visual.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(visual.type)}`}>
+                    {getTypeLabel(visual.type)}
+                  </span>
+                  <span className="text-sm text-gray-500">{visual.period.split('(')[0].trim()}</span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+      <AISearch category="see" />
+      <CulturalExplorer category="see" />
+      <ModelContextProtocol category="see" />
+    </>
   );
 };

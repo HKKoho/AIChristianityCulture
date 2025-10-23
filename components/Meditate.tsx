@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Heart, Clock, Play } from 'lucide-react';
 import type { MeditationGuide } from '../types';
+import { AISearch } from './AISearch';
+import { CulturalExplorer } from './CulturalExplorer';
+import { ModelContextProtocol } from './ModelContextProtocol';
 
 interface MeditateProps {
   onBack: () => void;
@@ -183,6 +186,7 @@ export const Meditate: React.FC<MeditateProps> = ({ onBack }) => {
 
   if (selectedMeditation) {
     return (
+      <>
       <div className="w-full max-w-4xl mx-auto p-6">
         <button
           onClick={() => { setSelectedMeditation(null); setCurrentStep(0); }}
@@ -281,59 +285,68 @@ export const Meditate: React.FC<MeditateProps> = ({ onBack }) => {
           </div>
         </div>
       </div>
+      <AISearch category="meditate" />
+      <CulturalExplorer category="meditate" />
+      <ModelContextProtocol category="meditate" />
+      </>
     );
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        返回首頁
-      </button>
+    <>
+      <div className="w-full max-w-6xl mx-auto p-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          返回首頁
+        </button>
 
-      <div className="text-center mb-12">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <Heart className="w-12 h-12 text-indigo-600" />
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-500 to-indigo-700 bg-clip-text text-transparent">
-            想
-          </h1>
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Heart className="w-12 h-12 text-indigo-600" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-500 to-indigo-700 bg-clip-text text-transparent">
+              想
+            </h1>
+          </div>
+          <h2 className="text-3xl font-semibold mb-4 text-gray-800">Meditate</h2>
+          <p className="text-xl text-gray-600">
+            進入安靜：靈魂探索、默觀祈禱與靈性操練
+          </p>
         </div>
-        <h2 className="text-3xl font-semibold mb-4 text-gray-800">Meditate</h2>
-        <p className="text-xl text-gray-600">
-          進入安靜：靈魂探索、默觀祈禱與靈性操練
-        </p>
-      </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {meditationGuides.map((meditation) => (
-          <button
-            key={meditation.id}
-            onClick={() => setSelectedMeditation(meditation)}
-            className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group text-left"
-          >
-            <div className="bg-gradient-to-br from-indigo-500 to-indigo-700 p-6 text-white">
-              <Heart className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="text-2xl font-bold mb-1">{meditation.title}</h3>
-              <p className="text-indigo-100">{meditation.titleEn}</p>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-600 mb-4 line-clamp-2">{meditation.description}</p>
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(meditation.type)}`}>
-                  {getTypeLabel(meditation.type)}
-                </span>
-                <span className="text-sm text-gray-500 flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  {meditation.duration}
-                </span>
+        <div className="grid md:grid-cols-2 gap-6">
+          {meditationGuides.map((meditation) => (
+            <button
+              key={meditation.id}
+              onClick={() => setSelectedMeditation(meditation)}
+              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group text-left"
+            >
+              <div className="bg-gradient-to-br from-indigo-500 to-indigo-700 p-6 text-white">
+                <Heart className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
+                <h3 className="text-2xl font-bold mb-1">{meditation.title}</h3>
+                <p className="text-indigo-100">{meditation.titleEn}</p>
               </div>
-            </div>
-          </button>
-        ))}
+              <div className="p-6">
+                <p className="text-gray-600 mb-4 line-clamp-2">{meditation.description}</p>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(meditation.type)}`}>
+                    {getTypeLabel(meditation.type)}
+                  </span>
+                  <span className="text-sm text-gray-500 flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    {meditation.duration}
+                  </span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+      <AISearch category="meditate" />
+      <CulturalExplorer category="meditate" />
+      <ModelContextProtocol category="meditate" />
+    </>
   );
 };

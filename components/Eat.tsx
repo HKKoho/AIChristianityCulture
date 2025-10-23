@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Utensils, ChefHat, Book } from 'lucide-react';
 import type { Recipe } from '../types';
+import { AISearch } from './AISearch';
+import { CulturalExplorer } from './CulturalExplorer';
+import { ModelContextProtocol } from './ModelContextProtocol';
 
 interface EatProps {
   onBack: () => void;
@@ -83,6 +86,7 @@ export const Eat: React.FC<EatProps> = ({ onBack }) => {
 
   if (selectedRecipe) {
     return (
+      <>
       <div className="w-full max-w-4xl mx-auto p-6">
         <button
           onClick={() => setSelectedRecipe(null)}
@@ -144,50 +148,59 @@ export const Eat: React.FC<EatProps> = ({ onBack }) => {
           </div>
         </div>
       </div>
+      <AISearch category="eat" />
+      <CulturalExplorer category="eat" />
+      <ModelContextProtocol category="eat" />
+      </>
     );
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-amber-600 hover:text-amber-700 mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        返回首頁
-      </button>
+    <>
+      <div className="w-full max-w-6xl mx-auto p-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-amber-600 hover:text-amber-700 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          返回首頁
+        </button>
 
-      <div className="text-center mb-12">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <Utensils className="w-12 h-12 text-amber-600" />
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-amber-500 to-amber-700 bg-clip-text text-transparent">
-            吃
-          </h1>
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Utensils className="w-12 h-12 text-amber-600" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-amber-500 to-amber-700 bg-clip-text text-transparent">
+              吃
+            </h1>
+          </div>
+          <h2 className="text-3xl font-semibold mb-4 text-gray-800">Eat</h2>
+          <p className="text-xl text-gray-600">
+            探索聖餐與愛筵的食物傳統
+          </p>
         </div>
-        <h2 className="text-3xl font-semibold mb-4 text-gray-800">Eat</h2>
-        <p className="text-xl text-gray-600">
-          探索聖餐與愛筵的食物傳統
-        </p>
-      </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {recipes.map((recipe) => (
-          <button
-            key={recipe.id}
-            onClick={() => setSelectedRecipe(recipe)}
-            className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group"
-          >
-            <div className="bg-gradient-to-br from-amber-500 to-amber-700 p-6 text-white">
-              <ChefHat className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="text-2xl font-bold mb-1">{recipe.name}</h3>
-              <p className="text-amber-100">{recipe.nameEn}</p>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-600 line-clamp-3">{recipe.description}</p>
-            </div>
-          </button>
-        ))}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {recipes.map((recipe) => (
+            <button
+              key={recipe.id}
+              onClick={() => setSelectedRecipe(recipe)}
+              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group"
+            >
+              <div className="bg-gradient-to-br from-amber-500 to-amber-700 p-6 text-white">
+                <ChefHat className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
+                <h3 className="text-2xl font-bold mb-1">{recipe.name}</h3>
+                <p className="text-amber-100">{recipe.nameEn}</p>
+              </div>
+              <div className="p-6">
+                <p className="text-gray-600 line-clamp-3">{recipe.description}</p>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+      <AISearch category="eat" />
+      <CulturalExplorer category="eat" />
+      <ModelContextProtocol category="eat" />
+    </>
   );
 };

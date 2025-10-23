@@ -1,0 +1,228 @@
+import React, { useState, useCallback } from 'react';
+import { ImageIcon, FileText, Upload, AlertTriangle } from 'lucide-react';
+import { analyzeImage, analyzeText } from '../services/geminiChatService';
+
+type AnalysisType = 'image' | 'text';
+
+interface ModelContextProtocolProps {
+  category?: 'eat' | 'walk' | 'listen' | 'see' | 'read' | 'meditate';
+}
+
+const fileToBase64 = async (file: File): Promise<{ data: string; mimeType: string }> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = reader.result as string;
+      const base64 = result.split(',')[1];
+      resolve({ data: base64, mimeType: file.type });
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ category }) => {
+  const [analysisType, setAnalysisType] = useState<AnalysisType>('image');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [inputText, setInputText] = useState<string>('');
+  const [result, setResult] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+
+  const getCategoryContext = () => {
+    switch (category) {
+      case 'eat':
+        return 'food traditions, communion, and agape feasts in Christianity';
+      case 'walk':
+        return 'pilgrimage routes, holy sites, and Christian walking traditions';
+      case 'listen':
+        return 'sacred music, hymns, chants, and Christian audio traditions';
+      case 'see':
+        return 'Christian art, architecture, icons, and visual culture';
+      case 'read':
+        return 'biblical manuscripts, theological texts, and Christian literature';
+      case 'meditate':
+        return 'spiritual practices, contemplation, and Christian meditation';
+      default:
+        return 'Christian culture and traditions';
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 4 * 1024 * 1024) {
+        setError('圖片大小不應超過 4MB');
+        return;
+      }
+      setError('');
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      setResult('');
+    }
+  };
+
+  const handleAnalysis = useCallback(async () => {
+    setIsLoading(true);
+    setError('');
+    setResult('');
+
+    try {
+      let analysisResult = '';
+      const context = getCategoryContext();
+
+      if (analysisType === 'image' && imageFile) {
+        const { data, mimeType } = await fileToBase64(imageFile);
+        analysisResult = await analyzeImage(data, mimeType, context);
+      } else if (analysisType === 'text' && inputText.trim()) {
+        analysisResult = await analyzeText(inputText, context);
+      } else {
+        setError('請提供分析的輸入內容');
+        setIsLoading(false);
+        return;
+      }
+      setResult(analysisResult);
+    } catch (err) {
+      console.error('分析失敗:', err);
+      setError('分析過程中發生錯誤，請檢查 API 設定或稍後再試');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [analysisType, imageFile, inputText, category]);
+
+  const canAnalyze = (analysisType === 'image' && imageFile) || (analysisType === 'text' && inputText.trim());
+
+  return (
+    <div className="w-full max-w-6xl mx-auto p-6 space-y-6">
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">模型上下文協議 (MCP)</h2>
+        <h3 className="text-xl text-gray-600 mb-2">Model Context Protocol</h3>
+        <p className="text-gray-600">分析圖片或文字以揭示深層的文化與歷史脈絡</p>
+      </div>
+
+      {/* Analysis Type Toggle */}
+      <div className="bg-gray-100 p-2 rounded-lg max-w-md mx-auto flex gap-2">
+        <button
+          onClick={() => setAnalysisType('image')}
+          className={`w-full flex justify-center items-center gap-2 p-3 rounded-md transition-all ${
+            analysisType === 'image'
+              ? 'bg-gradient-to-r from-indigo-500 to-indigo-700 text-white shadow-md'
+              : 'hover:bg-gray-200 text-gray-700'
+          }`}
+        >
+          <ImageIcon className="w-5 h-5" />
+          <span className="font-semibold">圖片分析</span>
+        </button>
+        <button
+          onClick={() => setAnalysisType('text')}
+          className={`w-full flex justify-center items-center gap-2 p-3 rounded-md transition-all ${
+            analysisType === 'text'
+              ? 'bg-gradient-to-r from-indigo-500 to-indigo-700 text-white shadow-md'
+              : 'hover:bg-gray-200 text-gray-700'
+          }`}
+        >
+          <FileText className="w-5 h-5" />
+          <span className="font-semibold">文字分析</span>
+        </button>
+      </div>
+
+      {/* Input Area */}
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto">
+        {analysisType === 'image' ? (
+          <div className="space-y-4">
+            <label htmlFor="image-upload" className="block text-lg font-medium text-gray-800">
+              上傳圖片
+            </label>
+            <div className="mt-2 flex justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 py-10 hover:border-indigo-500 transition-colors cursor-pointer">
+              <div className="text-center">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Preview" className="mx-auto h-48 w-auto rounded-md object-contain" />
+                ) : (
+                  <>
+                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
+                      <label
+                        htmlFor="image-upload"
+                        className="relative cursor-pointer rounded-md font-semibold text-indigo-600 hover:text-indigo-500"
+                      >
+                        <span>點擊上傳</span>
+                        <input
+                          id="image-upload"
+                          name="image-upload"
+                          type="file"
+                          className="sr-only"
+                          onChange={handleImageChange}
+                          accept="image/*"
+                        />
+                      </label>
+                      <p className="pl-1">或拖放檔案至此</p>
+                    </div>
+                    <p className="text-xs leading-5 text-gray-600">PNG, JPG, GIF 最大 4MB</p>
+                  </>
+                )}
+                {!imagePreview && (
+                  <input
+                    id="image-upload"
+                    name="image-upload"
+                    type="file"
+                    className="sr-only"
+                    onChange={handleImageChange}
+                    accept="image/*"
+                  />
+                )}
+              </div>
+            </div>
+            {imageFile && <p className="text-sm text-gray-600 text-center">已選擇: {imageFile.name}</p>}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <label htmlFor="text-input" className="block text-lg font-medium text-gray-800">
+              輸入要分析的文字
+            </label>
+            <textarea
+              id="text-input"
+              rows={8}
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              className="w-full bg-gray-50 p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
+              placeholder="輸入文字、引文、或描述..."
+            />
+          </div>
+        )}
+        <div className="mt-6 text-center">
+          <button
+            onClick={handleAnalysis}
+            disabled={!canAnalyze || isLoading}
+            className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-indigo-700 text-white font-bold rounded-lg shadow-md hover:from-indigo-600 hover:to-indigo-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
+          >
+            {isLoading ? '分析中...' : '開始分析'}
+          </button>
+        </div>
+      </div>
+
+      {/* Results Area */}
+      {(isLoading || error || result) && (
+        <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto animate-fade-in">
+          <h3 className="text-2xl font-bold mb-4 text-center text-gray-800">分析結果</h3>
+          {isLoading && (
+            <div className="flex justify-center p-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            </div>
+          )}
+          {error && (
+            <div className="bg-red-50 border border-red-300 text-red-800 px-4 py-3 rounded-md flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5" />
+              <span>{error}</span>
+            </div>
+          )}
+          {result && (
+            <div className="prose prose-lg max-w-none text-gray-700">
+              <div className="whitespace-pre-wrap">{result}</div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};

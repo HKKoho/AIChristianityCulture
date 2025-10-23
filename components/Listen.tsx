@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Headphones, Play, Pause, Music } from 'lucide-react';
 import type { AudioContent } from '../types';
+import { AISearch } from './AISearch';
+import { CulturalExplorer } from './CulturalExplorer';
+import { ModelContextProtocol } from './ModelContextProtocol';
 
 interface ListenProps {
   onBack: () => void;
@@ -100,6 +103,7 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
 
   if (selectedAudio) {
     return (
+      <>
       <div className="w-full max-w-4xl mx-auto p-6">
         <button
           onClick={() => { setSelectedAudio(null); setIsPlaying(false); }}
@@ -169,56 +173,65 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
           </div>
         </div>
       </div>
+      <AISearch category="listen" />
+      <CulturalExplorer category="listen" />
+      <ModelContextProtocol category="listen" />
+      </>
     );
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
-      <button
-        onClick={onBack}
-        className="flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-6 transition-colors"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        返回首頁
-      </button>
+    <>
+      <div className="w-full max-w-6xl mx-auto p-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          返回首頁
+        </button>
 
-      <div className="text-center mb-12">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <Headphones className="w-12 h-12 text-purple-600" />
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-500 to-purple-700 bg-clip-text text-transparent">
-            聽
-          </h1>
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Headphones className="w-12 h-12 text-purple-600" />
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-500 to-purple-700 bg-clip-text text-transparent">
+              聽
+            </h1>
+          </div>
+          <h2 className="text-3xl font-semibold mb-4 text-gray-800">Listen</h2>
+          <p className="text-xl text-gray-600">
+            聆聽天籟：聖樂、聖詩、禱告詞與默想音頻
+          </p>
         </div>
-        <h2 className="text-3xl font-semibold mb-4 text-gray-800">Listen</h2>
-        <p className="text-xl text-gray-600">
-          聆聽天籟：聖樂、聖詩、禱告詞與默想音頻
-        </p>
-      </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {audioContents.map((audio) => (
-          <button
-            key={audio.id}
-            onClick={() => setSelectedAudio(audio)}
-            className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group text-left"
-          >
-            <div className="bg-gradient-to-br from-purple-500 to-purple-700 p-6 text-white">
-              <Headphones className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="text-2xl font-bold mb-1">{audio.title}</h3>
-              <p className="text-purple-100">{audio.titleEn}</p>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-600 mb-4 line-clamp-2">{audio.description}</p>
-              <div className="flex items-center justify-between">
-                <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(audio.type)}`}>
-                  {getTypeLabel(audio.type)}
-                </span>
-                <span className="text-sm text-gray-500">{audio.duration}</span>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {audioContents.map((audio) => (
+            <button
+              key={audio.id}
+              onClick={() => setSelectedAudio(audio)}
+              className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group text-left"
+            >
+              <div className="bg-gradient-to-br from-purple-500 to-purple-700 p-6 text-white">
+                <Headphones className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
+                <h3 className="text-2xl font-bold mb-1">{audio.title}</h3>
+                <p className="text-purple-100">{audio.titleEn}</p>
               </div>
-            </div>
-          </button>
-        ))}
+              <div className="p-6">
+                <p className="text-gray-600 mb-4 line-clamp-2">{audio.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(audio.type)}`}>
+                    {getTypeLabel(audio.type)}
+                  </span>
+                  <span className="text-sm text-gray-500">{audio.duration}</span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
+      <AISearch category="listen" />
+      <CulturalExplorer category="listen" />
+      <ModelContextProtocol category="listen" />
+    </>
   );
 };
