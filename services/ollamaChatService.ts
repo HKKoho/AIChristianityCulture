@@ -1,313 +1,331 @@
 /**
  * Ollama Chat Service
- * Provides chat functionality using Ollama Cloud API via proxy
- * Mirrors the interface of geminiChatService.ts for drop-in replacement
+ * High-level chat interface for Ollama API
+ * Mirrors geminiChatService interface for compatibility
  */
 
-interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
+import * as OllamaAPI from '../api/ollama';
+
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
-interface ChatSession {
-  messages: ChatMessage[];
-  wordLimit: number;
-  systemInstruction?: string;
+export interface SearchResult {
+  title: string;
+  snippet: string;
+  link: string;
 }
 
-// Simple chat session object that maintains conversation history
+export interface ChatResponse {
+  text: string;
+  sources?: SearchResult[];
+}
+
+/**
+ * Chat class for maintaining conversation history with Ollama
+ */
 export class Chat {
-  private messages: ChatMessage[] = [];
-  private wordLimit: number;
-  private systemInstruction?: string;
+  private messages: OllamaAPI.OllamaMessage[] = [];
+  private model: string;
+  private temperature: number;
+  private topP: number;
 
-  constructor(wordLimit: number = 100, systemInstruction?: string) {
-    this.wordLimit = wordLimit;
-    this.systemInstruction = systemInstruction;
+  constructor(
+    model: string = 'kimi-k2:1t-cloud',
+    systemInstruction?: string,
+    options?: {
+      temperature?: number;
+      topP?: number;
+    }
+  ) {
+    this.model = model;
+    this.temperature = options?.temperature ?? 0.7;
+    this.topP = options?.topP ?? 0.9;
 
-    // Add system instruction as first message if provided
     if (systemInstruction) {
       this.messages.push({
         role: 'system',
-        content: systemInstruction
+        content: systemInstruction,
       });
     }
+
+    console.log(`🤖 Ollama Chat initialized with model: ${this.model}`);
   }
 
-  async sendMessageStream(options: { message: string }) {
-    const { message } = options;
+  /**
+   * Send a message and get a response
+   */
+  async sendMessage(userMessage: string): Promise<string> {
+    console.log(`💬 Ollama: Sending message (${this.messages.length} messages in history)`);
 
-    // Add user message to history
     this.messages.push({
       role: 'user',
-      content: message
+      content: userMessage,
     });
 
     try {
-      // Call Ollama API via proxy
-      const response = await fetch('/api/ollama', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await OllamaAPI.chat({
+        model: this.model,
+        messages: this.messages,
+        options: {
+          temperature: this.temperature,
+          top_p: this.topP,
         },
-        body: JSON.stringify({
-          model: 'qwen-coder:480b-cloud', // Default model
-          messages: this.messages,
-          temperature: 0.7,
-          max_tokens: this.wordLimit * 10, // Rough estimate: 10 tokens per word
-          stream: false
-        })
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Ollama API error (${response.status}): ${errorText}`);
-      }
+      const assistantMessage = response.message.content;
 
-      const data = await response.json();
-
-      // Extract content from OpenAI-compatible response
-      let content = '';
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        content = data.choices[0].message.content;
-      } else {
-        throw new Error('Invalid response format from Ollama API');
-      }
-
-      // Add assistant response to history
       this.messages.push({
         role: 'assistant',
-        content
+        content: assistantMessage,
       });
 
-      // Return a stream-like object for compatibility
-      return {
-        text: content,
-        stream: (async function* () {
-          yield content;
-        })()
-      };
-    } catch (error: any) {
-      console.error('Ollama chat error:', error);
-      throw new Error(`Failed to send message: ${error.message}`);
+      console.log(`✅ Ollama: Response received (${assistantMessage.length} chars)`);
+
+      return assistantMessage;
+    } catch (error) {
+      console.error('❌ Ollama chat error:', error);
+      // Remove the user message we just added since it failed
+      this.messages.pop();
+      throw error;
     }
+  }
+
+  /**
+   * Analyze an image (requires vision-capable model)
+   */
+  async analyzeImage(
+    imageBase64: string,
+    prompt: string
+  ): Promise<string> {
+    console.log('🖼️ Ollama: Analyzing image');
+
+    // Use vision model for image analysis
+    const visionModel = this.model.includes('vision') || this.model.includes('llava')
+      ? this.model
+      : 'llava:34b';
+
+    const response = await OllamaAPI.analyzeImage(imageBase64, prompt, visionModel);
+
+    return response;
+  }
+
+  /**
+   * Get current conversation history
+   */
+  getHistory(): ChatMessage[] {
+    return this.messages.map(msg => ({
+      role: msg.role,
+      content: msg.content,
+    }));
+  }
+
+  /**
+   * Clear conversation history (keeps system message if any)
+   */
+  clearHistory(): void {
+    const systemMessage = this.messages.find(msg => msg.role === 'system');
+    this.messages = systemMessage ? [systemMessage] : [];
+    console.log('🗑️ Ollama: Conversation history cleared');
+  }
+
+  /**
+   * Get the current model being used
+   */
+  getModel(): string {
+    return this.model;
+  }
+
+  /**
+   * Change the model
+   */
+  setModel(model: string): void {
+    console.log(`🔄 Ollama: Switching model from ${this.model} to ${model}`);
+    this.model = model;
   }
 }
 
-export const createChatSession = (wordLimit: number = 100): Chat | null => {
-  const systemInstruction = `You are a Cultural Explorer Assistant, an AI expert on Christian cultural traditions, history, and practices.
-
-Your expertise covers:
-- Christian food traditions, communion, agape feasts, and biblical meals
-- Pilgrimage routes, holy sites, and biblical locations
-- Sacred music, hymns, chants, and worship traditions
-- Christian art, icons, architecture, and visual culture
-- Biblical manuscripts, church fathers, and theological literature
-- Christian meditation, contemplative prayer, and spiritual practices
-
-You are knowledgeable, respectful, and culturally sensitive. Answer questions with historical accuracy, theological depth, and pastoral wisdom. Use markdown for formatting when appropriate. Always be helpful and encouraging in exploring the richness of Christian cultural heritage.
-
-IMPORTANT: Limit each response to approximately ${wordLimit} words unless the user explicitly asks for more details or a longer explanation. Be concise and focused on the most essential information.
-
-Respond primarily in Traditional Chinese (繁體中文) unless the user writes in English.`;
-
-  try {
-    return new Chat(wordLimit, systemInstruction);
-  } catch (error) {
-    console.error('Failed to create Ollama chat session:', error);
-    return null;
+/**
+ * Perform a text analysis (simple one-shot query)
+ */
+export async function analyzeText(
+  prompt: string,
+  options?: {
+    model?: string;
+    temperature?: number;
+    topP?: number;
+    systemInstruction?: string;
   }
-};
+): Promise<ChatResponse> {
+  const model = options?.model || 'kimi-k2:1t-cloud';
 
-export const sendChatMessage = async (
-  chat: Chat,
-  message: string
-): Promise<any> => {
-  if (!chat) {
-    throw new Error('Chat session not initialized');
-  }
+  console.log(`📝 Ollama: Analyzing text with ${model}`);
 
-  return chat.sendMessageStream({ message });
-};
-
-export const isServiceAvailable = (): boolean => {
-  // Ollama is available if the API key is configured
-  return true; // The proxy will handle the actual check
-};
-
-export const analyzeImage = async (
-  imageBase64: string,
-  mimeType: string,
-  categoryContext?: string,
-  wordLimit: number = 100
-): Promise<string> => {
-  const contextPrompt = categoryContext
-    ? `Analyze this image in the context of ${categoryContext}.`
-    : 'Analyze this image for its cultural and historical context in Christianity.';
-
-  const prompt = `${contextPrompt}
-
-IMPORTANT: Limit your response to approximately ${wordLimit} words. Be concise and focused.
-
-Briefly describe key rituals, symbols, art, architecture, or historical significance. Explain their theological meaning and cultural importance. Present your findings in a clear format using markdown. Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.
-
-[Image data would be included here - Note: Ollama vision models may have different capabilities]`;
-
-  try {
-    // For image analysis, we'd use a vision-capable model like llava
-    const response = await fetch('/api/ollama', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'llava:34b', // Vision model
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-            images: [imageBase64] // Some Ollama models support images in messages
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: wordLimit * 10,
-        stream: false
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Ollama image analysis error: ${response.statusText}`);
+  const response = await OllamaAPI.generate(
+    model,
+    prompt,
+    {
+      temperature: options?.temperature ?? 0.7,
+      top_p: options?.topP ?? 0.9,
+      system: options?.systemInstruction,
     }
+  );
 
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content || 'Unable to analyze image';
-  } catch (error: any) {
-    console.error('Ollama image analysis error:', error);
-    throw new Error(`Failed to analyze image: ${error.message}`);
-  }
-};
-
-export const analyzeText = async (
-  text: string,
-  categoryContext?: string,
-  wordLimit: number = 100
-): Promise<string> => {
-  const contextPrompt = categoryContext
-    ? `Analyze the following text in the context of ${categoryContext}.`
-    : 'Analyze the following text for its cultural and historical context in Christianity.';
-
-  const prompt = `${contextPrompt}
-
-IMPORTANT: Limit your response to approximately ${wordLimit} words. Be concise and focused.
-
-Briefly identify the most relevant:
-- Biblical references and theological concepts
-- Historical periods, events, or figures
-- Cultural practices and traditions
-- Symbolic meanings and spiritual significance
-
-Explain their key importance and connections to Christian faith and practice. Present findings concisely using markdown.
-
-Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.
-
-Text to analyze:
----
-${text}`;
-
-  try {
-    const response = await fetch('/api/ollama', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'qwen-coder:480b-cloud',
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: wordLimit * 10,
-        stream: false
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Ollama text analysis error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content || 'Unable to analyze text';
-  } catch (error: any) {
-    console.error('Ollama text analysis error:', error);
-    throw new Error(`Failed to analyze text: ${error.message}`);
-  }
-};
-
-export interface GroundingChunk {
-  web: {
-    uri: string;
-    title: string;
+  return {
+    text: response,
   };
 }
 
-export interface SearchResult {
-  text: string;
-  sources: GroundingChunk[];
+/**
+ * Perform a search (Note: Ollama doesn't have built-in web search)
+ * This is a compatibility function that performs text generation instead
+ */
+export async function performSearch(
+  query: string,
+  options?: {
+    model?: string;
+    temperature?: number;
+    topP?: number;
+    maxLength?: number;
+  }
+): Promise<ChatResponse> {
+  const model = options?.model || 'kimi-k2:1t-cloud';
+  const maxLength = options?.maxLength || 500;
+
+  console.log(`🔍 Ollama: Performing search-style query with ${model}`);
+  console.log(`⚠️ Note: Ollama doesn't have web search. Using knowledge-based response.`);
+
+  const enhancedQuery = `請回答以下問題（限制在 ${maxLength} 字以內）：
+
+${query}
+
+注意：請基於你的知識提供準確的回答。如果不確定，請明確說明。`;
+
+  const response = await OllamaAPI.generate(
+    model,
+    enhancedQuery,
+    {
+      temperature: options?.temperature ?? 0.7,
+      top_p: options?.topP ?? 0.9,
+    }
+  );
+
+  return {
+    text: response,
+  };
 }
 
-export const performSearch = async (
-  query: string,
-  categoryContext?: string,
-  wordLimit: number = 100
-): Promise<SearchResult> => {
-  const contextPrompt = categoryContext
-    ? `Regarding the cultural or historical context of ${categoryContext}, answer the following question: "${query}".`
-    : `Regarding Christian cultural and historical context, answer the following question: "${query}".`;
+/**
+ * Analyze an image (standalone function)
+ */
+export async function analyzeImage(
+  imageBase64: string,
+  prompt: string,
+  options?: {
+    model?: string;
+    temperature?: number;
+    topP?: number;
+  }
+): Promise<ChatResponse> {
+  const model = options?.model || 'llava:34b';
 
-  const fullQuery = `${contextPrompt}
+  console.log(`🖼️ Ollama: Analyzing image with ${model}`);
 
-IMPORTANT: Limit your response to approximately ${wordLimit} words. Be concise and focused on the most essential information.
+  const response = await OllamaAPI.analyzeImage(imageBase64, prompt, model);
 
-Provide a brief answer with key historical details, theological significance, and cultural context. Use markdown for formatting. Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.`;
+  return {
+    text: response,
+  };
+}
 
+/**
+ * Generate a structured response (e.g., for sermon generation)
+ */
+export async function generateStructured<T>(
+  prompt: string,
+  options: {
+    model?: string;
+    temperature?: number;
+    topP?: number;
+    systemInstruction?: string;
+    schema?: any; // JSON schema for structured output
+  }
+): Promise<T> {
+  const model = options.model || 'kimi-k2:1t-cloud';
+
+  console.log(`📋 Ollama: Generating structured output with ${model}`);
+
+  // Add JSON formatting instruction to prompt
+  const enhancedPrompt = `${prompt}
+
+請以 JSON 格式回應，確保符合以下結構：
+${options.schema ? JSON.stringify(options.schema, null, 2) : '標準 JSON 物件'}
+
+只回傳 JSON，不要包含其他文字說明。`;
+
+  const response = await OllamaAPI.generate(
+    model,
+    enhancedPrompt,
+    {
+      temperature: options.temperature ?? 0.7,
+      top_p: options.topP ?? 0.9,
+      system: options.systemInstruction,
+    }
+  );
+
+  // Try to extract JSON from response
   try {
-    const response = await fetch('/api/ollama', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'qwen-coder:480b-cloud',
-        messages: [
-          {
-            role: 'user',
-            content: fullQuery
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: wordLimit * 10,
-        stream: false
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Ollama search error (${response.status}): ${errorText}`);
+    // Try to find JSON in the response
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
     }
 
-    const data = await response.json();
-    const text = data.choices?.[0]?.message?.content || 'Unable to perform search';
-
-    // Note: Ollama doesn't have built-in web search like Gemini
-    // So we return empty sources array
-    const sources: GroundingChunk[] = [];
-
-    return { text, sources };
-  } catch (error: any) {
-    console.error('Ollama search error:', error);
-    throw new Error(`Failed to perform search: ${error.message}`);
+    // If no JSON found, try parsing the whole response
+    return JSON.parse(response);
+  } catch (error) {
+    console.error('❌ Failed to parse JSON response:', error);
+    console.log('Raw response:', response);
+    throw new Error(`Failed to parse structured response: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+}
+
+/**
+ * Check if Ollama service is available
+ */
+export async function checkHealth(): Promise<boolean> {
+  try {
+    const isHealthy = await OllamaAPI.checkHealth();
+    console.log(`🏥 Ollama health check: ${isHealthy ? '✅ Healthy' : '❌ Unhealthy'}`);
+    return isHealthy;
+  } catch (error) {
+    console.error('❌ Ollama health check failed:', error);
+    return false;
+  }
+}
+
+/**
+ * List available models
+ */
+export async function listAvailableModels(): Promise<string[]> {
+  try {
+    const models = await OllamaAPI.listModels();
+    console.log(`📋 Available Ollama models: ${models.length}`);
+    return models;
+  } catch (error) {
+    console.error('❌ Failed to list models:', error);
+    return [];
+  }
+}
+
+// Export for backward compatibility
+export default {
+  Chat,
+  analyzeText,
+  performSearch,
+  analyzeImage,
+  generateStructured,
+  checkHealth,
+  listAvailableModels,
 };
