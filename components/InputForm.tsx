@@ -52,7 +52,7 @@ export const InputForm: React.FC<InputFormProps> = ({ onGenerate, selectedEngine
   const [sermonBasis, setSermonBasis] = useState<SermonBasis>(SermonBasis.BIBLICAL_STUDY);
   const [sermonLength, setSermonLength] = useState<SermonLength>(5);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedLLMModel, setSelectedLLMModel] = useState(SERMON_LLM_MODELS[0].id);
+  const [selectedLLMModel, setSelectedLLMModel] = useState('qwen-coder:480b-cloud'); // Default Ollama model
   const [temperature, setTemperature] = useState(0.7);
   const [topP, setTopP] = useState(0.9);
 

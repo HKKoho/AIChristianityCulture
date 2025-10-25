@@ -8,6 +8,8 @@ interface LocalLLMGenerateOptions {
 
 // Ollama Cloud available models (actual models in your account)
 export const OLLAMA_CLOUD_MODELS = [
+  'qwen-coder:480b-cloud',  // Default primary model
+  'kimi-k2:1t-cloud',       // Fallback model
   'kimi-k2:1t',
   'qwen3-coder:480b',
   'deepseek-v3.1:671b',
@@ -116,6 +118,10 @@ export const generatePresentation = async (
 
   setLoadingMessage(`使用 ${options.model} 生成講道內容...`);
 
+  // Define fallback model
+  const FALLBACK_MODEL = 'kimi-k2:1t-cloud';
+  const PRIMARY_MODEL = 'qwen-coder:480b-cloud';
+
   try {
     const response = await callOllamaCloud(options.model, prompt, options.temperature);
 
@@ -163,9 +169,24 @@ export const generatePresentation = async (
 
   } catch (error) {
     console.error('Ollama Cloud generation error:', error);
-    setLoadingMessage('生成失敗，使用備用內容...');
 
-    // Fallback to mock data if API fails
+    // If primary model fails and hasn't tried fallback yet, try fallback model
+    if (options.model === PRIMARY_MODEL) {
+      console.log(`Primary model ${PRIMARY_MODEL} failed, trying fallback model ${FALLBACK_MODEL}...`);
+      setLoadingMessage(`主要模型失敗，切換到備用模型 ${FALLBACK_MODEL}...`);
+
+      try {
+        // Retry with fallback model
+        const fallbackOptions = { ...options, model: FALLBACK_MODEL };
+        return await generatePresentation(topic, keyPoints, sermonBasis, sermonLength, setLoadingMessage, fallbackOptions);
+      } catch (fallbackError) {
+        console.error('Fallback model also failed:', fallbackError);
+        setLoadingMessage('備用模型也失敗，使用預設內容...');
+      }
+    }
+
+    // Final fallback to mock data if all API attempts fail
+    setLoadingMessage('生成失敗，使用備用內容...');
     return createFallbackPresentation(topic, keyPoints, sermonBasis, sermonLength, options);
   }
 };

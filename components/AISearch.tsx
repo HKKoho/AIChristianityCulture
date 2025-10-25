@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { Search, AlertTriangle, Loader, Mic, Volume2, StopCircle } from 'lucide-react';
-import { performSearch } from '../services/geminiChatService';
+import { performSearch } from '../services/multiProviderChatService';
 
 interface SearchResult {
   text: string;

@@ -257,6 +257,20 @@ export interface TheologyAssistantState {
 // Sermon generation specific LLM models
 export const SERMON_LLM_MODELS: LocalLLMModel[] = [
   // Ollama Cloud Models (actual available models in your account)
+  // Default primary model
+  {
+    id: 'qwen-coder:480b-cloud',
+    name: 'Qwen Coder 480B Cloud ☁️ (預設)',
+    size: 'Cloud (480B)',
+    description: '預設雲端模型，超大規模編碼能力，最適合結構化講道內容生成'
+  },
+  // Fallback model
+  {
+    id: 'kimi-k2:1t-cloud',
+    name: 'Kimi K2 1T Cloud ☁️ (備用)',
+    size: 'Cloud (1T)',
+    description: '備用模型，超大參數，極致的理解和生成能力'
+  },
   {
     id: 'gpt-oss:120b',
     name: 'GPT-OSS 120B Cloud ☁️',

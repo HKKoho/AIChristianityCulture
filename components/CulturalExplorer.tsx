@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import type { Chat } from '@google/genai';
 import { MessageCircle, X, Send, User, Bot, Loader, Mic, Volume2, StopCircle } from 'lucide-react';
-import { createChatSession, sendChatMessage } from '../services/geminiChatService';
+import { createChatSession, sendChatMessage, Chat } from '../services/multiProviderChatService';
 
 interface ChatMessage {
   role: 'user' | 'model';

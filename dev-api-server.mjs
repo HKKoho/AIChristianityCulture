@@ -43,8 +43,8 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  // Only handle /api/chat endpoint
-  if (req.url !== '/api/chat') {
+  // Handle /api/chat, /api/ollama, and /api/unified endpoints
+  if (req.url !== '/api/chat' && req.url !== '/api/ollama' && req.url !== '/api/unified') {
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Not Found' }));
     return;
@@ -65,6 +65,107 @@ const server = createServer(async (req, res) => {
 
   req.on('end', async () => {
     try {
+      // Handle /api/ollama endpoint (direct Ollama calls)
+      if (req.url === '/api/ollama') {
+        const { model, messages, temperature, max_tokens, stream } = JSON.parse(body);
+
+        if (!model || !messages) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Missing required fields: model and messages' }));
+          return;
+        }
+
+        const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
+        const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'https://api.ollama.cloud';
+
+        if (!OLLAMA_API_KEY) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'OLLAMA_API_KEY not configured' }));
+          return;
+        }
+
+        const apiUrl = `${OLLAMA_API_URL}/v1/chat/completions`;
+
+        console.log(`→ Calling Ollama Cloud API (model: ${model})...`);
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OLLAMA_API_KEY}`
+          },
+          body: JSON.stringify({
+            model,
+            messages,
+            temperature: temperature || 0.7,
+            max_tokens: max_tokens || 2000,
+            stream: stream || false
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`✗ Ollama API error (${response.status}):`, errorText);
+          res.writeHead(response.status, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            error: `Ollama API error (${response.status}): ${errorText}`
+          }));
+          return;
+        }
+
+        const data = await response.json();
+        console.log(`✓ Ollama API response received`);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
+        return;
+      }
+
+      // Handle /api/unified endpoint (multi-provider with unified response)
+      if (req.url === '/api/unified') {
+        const { provider, model, messages, temperature, max_tokens, enableWebSearch, image, imageMimeType } = JSON.parse(body);
+
+        if (!provider || !model || !messages) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Missing required fields: provider, model, messages' }));
+          return;
+        }
+
+        let apiResponse;
+
+        try {
+          switch (provider) {
+            case 'ollama':
+              apiResponse = await handleOllamaUnified(model, messages, temperature, max_tokens);
+              break;
+
+            case 'gemini':
+              apiResponse = await handleGeminiUnified(model, messages, temperature, max_tokens, enableWebSearch, image, imageMimeType);
+              break;
+
+            case 'openai':
+              apiResponse = await handleOpenAIUnified(model, messages, temperature, max_tokens, image, imageMimeType);
+              break;
+
+            default:
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: `Unsupported provider: ${provider}` }));
+              return;
+          }
+
+          console.log(`✓ ${provider} API response received via unified endpoint`);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(apiResponse));
+          return;
+
+        } catch (error) {
+          console.error(`✗ ${provider} unified API error:`, error);
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: error.message }));
+          return;
+        }
+      }
+
+      // Handle /api/chat endpoint (multi-provider)
       const { provider, model, messages, temperature, topP, maxTokens } = JSON.parse(body);
 
       let apiUrl;
@@ -73,7 +174,7 @@ const server = createServer(async (req, res) => {
 
       switch (provider) {
         case 'ollama':
-          apiUrl = 'https://ollama.com/v1/chat/completions';
+          apiUrl = `${process.env.OLLAMA_API_URL || 'https://api.ollama.cloud'}/v1/chat/completions`;
           headers = {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${process.env.OLLAMA_API_KEY}`
@@ -186,6 +287,196 @@ const server = createServer(async (req, res) => {
     }
   });
 });
+
+// Handler functions for unified API endpoint
+async function handleOllamaUnified(model, messages, temperature, max_tokens) {
+  const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
+  const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'https://api.ollama.cloud';
+
+  if (!OLLAMA_API_KEY) {
+    throw new Error('OLLAMA_API_KEY not configured');
+  }
+
+  const response = await fetch(`${OLLAMA_API_URL}/v1/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${OLLAMA_API_KEY}`
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: temperature || 0.7,
+      max_tokens: max_tokens || 2000,
+      stream: false
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Ollama API error (${response.status}): ${errorText}`);
+  }
+
+  return await response.json();
+}
+
+async function handleGeminiUnified(model, messages, temperature, max_tokens, enableWebSearch, imageBase64, imageMimeType) {
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+  if (!GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY not configured');
+  }
+
+  // Convert messages to Gemini format
+  const geminiMessages = messages
+    .filter(m => m.role !== 'system')
+    .map(m => {
+      const parts = [{ text: m.content }];
+
+      // Add image if provided
+      if (imageBase64 && imageMimeType) {
+        parts.push({
+          inline_data: {
+            mime_type: imageMimeType,
+            data: imageBase64
+          }
+        });
+      }
+
+      return {
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts
+      };
+    });
+
+  const systemMessage = messages.find(m => m.role === 'system');
+
+  const requestBody = {
+    contents: geminiMessages,
+    generationConfig: {
+      temperature: temperature || 0.7,
+      topP: 0.95,
+      maxOutputTokens: max_tokens || 2000
+    }
+  };
+
+  // Add system instruction if present
+  if (systemMessage) {
+    requestBody.systemInstruction = {
+      parts: [{ text: systemMessage.content }]
+    };
+  }
+
+  // Add web search tool if enabled
+  if (enableWebSearch) {
+    requestBody.tools = [{ googleSearch: {} }];
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  // Extract content
+  const content = data.candidates?.[0]?.content?.parts
+    ?.map(part => part.text)
+    ?.join('') || '';
+
+  // Extract grounding sources if web search was used
+  const sources = data.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+
+  // Return in OpenAI-compatible format
+  return {
+    choices: [
+      {
+        message: {
+          role: 'assistant',
+          content
+        },
+        finish_reason: 'stop',
+        index: 0
+      }
+    ],
+    content,
+    sources,
+    model,
+    usage: {
+      prompt_tokens: data.usageMetadata?.promptTokenCount || 0,
+      completion_tokens: data.usageMetadata?.candidatesTokenCount || 0,
+      total_tokens: data.usageMetadata?.totalTokenCount || 0
+    }
+  };
+}
+
+async function handleOpenAIUnified(model, messages, temperature, max_tokens, imageBase64, imageMimeType) {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  if (!OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY not configured');
+  }
+
+  // Convert messages for vision if image is provided
+  let processedMessages = messages;
+  if (imageBase64 && imageMimeType) {
+    processedMessages = messages.map(m => {
+      if (m.role === 'user' && m.image) {
+        return {
+          role: 'user',
+          content: [
+            { type: 'text', text: m.content },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:${imageMimeType};base64,${imageBase64}`
+              }
+            }
+          ]
+        };
+      }
+      return m;
+    });
+  }
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model,
+      messages: processedMessages,
+      temperature: temperature || 0.7,
+      max_tokens: max_tokens || 2000
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenAI API error (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  // Add content field for consistency
+  return {
+    ...data,
+    content: data.choices?.[0]?.message?.content || ''
+  };
+}
 
 server.listen(PORT, () => {
   console.log('\n🚀 Local API Server Running');

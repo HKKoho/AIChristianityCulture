@@ -19,7 +19,7 @@ import { AppState, AiEngine, DEFAULT_SYSTEM_PROMPT_CONFIG } from './types';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.LANDING);
-  const [aiEngine, setAiEngine] = useState<AiEngine>(process.env.API_KEY ? AiEngine.GEMINI : AiEngine.LOCAL_LLM);
+  const [aiEngine, setAiEngine] = useState<AiEngine>(AiEngine.LOCAL_LLM); // Default to Ollama Local LLM
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [generatedContent, setGeneratedContent] = useState<GeneratedPresentation | SavedPresentation | null>(null);
   const [currentTopic, setCurrentTopic] = useState<string>('');

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { ImageIcon, FileText, Upload, AlertTriangle, Volume2, StopCircle } from 'lucide-react';
-import { analyzeImage, analyzeText } from '../services/geminiChatService';
+import { analyzeImage, analyzeText } from '../services/multiProviderChatService';
 
 type AnalysisType = 'image' | 'text';
 
