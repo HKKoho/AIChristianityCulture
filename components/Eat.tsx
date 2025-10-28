@@ -5,12 +5,15 @@ import { AISearch } from './AISearch';
 import { CulturalExplorer } from './CulturalExplorer';
 import { ModelContextProtocol } from './ModelContextProtocol';
 import { Slideshow } from './Slideshow';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface EatProps {
   onBack: () => void;
 }
 
 export const Eat: React.FC<EatProps> = ({ onBack }) => {
+  const { t } = useTranslation(['eat', 'common']);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   // Images for the Eat category slideshow
@@ -97,13 +100,16 @@ export const Eat: React.FC<EatProps> = ({ onBack }) => {
     return (
       <>
       <div className="w-full max-w-4xl mx-auto p-6">
-        <button
-          onClick={() => setSelectedRecipe(null)}
-          className="flex items-center gap-2 text-amber-600 hover:text-amber-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回食譜列表
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => setSelectedRecipe(null)}
+            className="flex items-center gap-2 text-amber-600 hover:text-amber-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToList')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-amber-500 to-amber-700 p-8 text-white">
@@ -120,7 +126,7 @@ export const Eat: React.FC<EatProps> = ({ onBack }) => {
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <Book className="w-6 h-6 text-amber-600" />
-                <h2 className="text-2xl font-bold text-gray-800">聖經背景</h2>
+                <h2 className="text-2xl font-bold text-gray-800">{t('eat:biblicalContext')}</h2>
               </div>
               <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded">
                 <p className="text-gray-700 leading-relaxed">{selectedRecipe.biblicalContext}</p>
@@ -129,7 +135,7 @@ export const Eat: React.FC<EatProps> = ({ onBack }) => {
 
             <div className="grid md:grid-cols-2 gap-8">
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">材料</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('eat:ingredients')}</h2>
                 <ul className="space-y-2">
                   {selectedRecipe.ingredients.map((ingredient, index) => (
                     <li key={index} className="flex items-start gap-2">
@@ -141,7 +147,7 @@ export const Eat: React.FC<EatProps> = ({ onBack }) => {
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">製作步驟</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('eat:instructions')}</h2>
                 <ol className="space-y-3">
                   {selectedRecipe.instructions.map((instruction, index) => (
                     <li key={index} className="flex items-start gap-3">
@@ -167,13 +173,16 @@ export const Eat: React.FC<EatProps> = ({ onBack }) => {
   return (
     <>
       <div className="w-full max-w-6xl mx-auto p-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-amber-600 hover:text-amber-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回首頁
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-amber-600 hover:text-amber-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToHome')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         {/* Slideshow Section */}
         <div className="mb-8">
@@ -184,12 +193,12 @@ export const Eat: React.FC<EatProps> = ({ onBack }) => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Utensils className="w-12 h-12 text-amber-600" />
             <h1 className="text-5xl font-bold bg-gradient-to-r from-amber-500 to-amber-700 bg-clip-text text-transparent">
-              吃
+              {t('eat:title')}
             </h1>
           </div>
-          <h2 className="text-3xl font-semibold mb-4 text-gray-800">Eat</h2>
+          <h2 className="text-3xl font-semibold mb-4 text-gray-800">{t('common:categories.eat')}</h2>
           <p className="text-xl text-gray-600">
-            探索聖餐與愛筵的食物傳統
+            {t('eat:subtitle')}
           </p>
         </div>
 
