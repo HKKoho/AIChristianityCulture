@@ -5,12 +5,15 @@ import { AISearch } from './AISearch';
 import { CulturalExplorer } from './CulturalExplorer';
 import { ModelContextProtocol } from './ModelContextProtocol';
 import { Slideshow } from './Slideshow';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface SeeProps {
   onBack: () => void;
 }
 
 export const See: React.FC<SeeProps> = ({ onBack }) => {
+  const { t } = useTranslation(['see', 'common']);
   const [selectedVisual, setSelectedVisual] = useState<VisualContent | null>(null);
 
   // Images for the See category slideshow
@@ -99,11 +102,11 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'painting': return '繪畫';
-      case 'icon': return '聖像';
-      case 'sculpture': return '雕塑';
-      case 'architecture': return '建築';
-      case 'manuscript': return '手抄本';
+      case 'painting': return t('see:painting');
+      case 'icon': return t('see:icon');
+      case 'sculpture': return t('see:sculpture');
+      case 'architecture': return t('see:architecture');
+      case 'manuscript': return t('see:manuscript');
       default: return type;
     }
   };
@@ -123,13 +126,16 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
     return (
       <>
         <div className="w-full max-w-4xl mx-auto p-6">
-          <button
-            onClick={() => setSelectedVisual(null)}
-            className="flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            返回藝術列表
-          </button>
+          <div className="flex justify-between items-center mb-6">
+            <button
+              onClick={() => setSelectedVisual(null)}
+              className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              {t('common:navigation.backToList')}
+            </button>
+            <LanguageSwitcher />
+          </div>
 
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div className="bg-gradient-to-r from-green-500 to-green-700 p-8 text-white">
@@ -157,24 +163,24 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
               <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center mb-6">
                 <div className="text-center">
                   <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">圖像待添加</p>
+                  <p className="text-gray-500">{t('see:imagePending')}</p>
                   <p className="text-sm text-gray-400">{selectedVisual.imageUrl}</p>
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6 mb-6">
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <h3 className="font-bold text-gray-800 mb-2">時期</h3>
+                  <h3 className="font-bold text-gray-800 mb-2">{t('see:period')}</h3>
                   <p className="text-gray-700">{selectedVisual.period}</p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <h3 className="font-bold text-gray-800 mb-2">聖經出處</h3>
+                  <h3 className="font-bold text-gray-800 mb-2">{t('see:biblicalReference')}</h3>
                   <p className="text-gray-700">{selectedVisual.biblicalReference}</p>
                 </div>
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">藝術詮釋與神學意義</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('see:interpretation')}</h2>
                 <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
                   <p className="text-gray-700 leading-relaxed">{selectedVisual.interpretation}</p>
                 </div>
@@ -192,13 +198,16 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
   return (
     <>
       <div className="w-full max-w-6xl mx-auto p-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回首頁
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToHome')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         {/* Slideshow Section */}
         <div className="mb-8">
@@ -209,12 +218,12 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Eye className="w-12 h-12 text-green-600" />
             <h1 className="text-5xl font-bold bg-gradient-to-r from-green-500 to-green-700 bg-clip-text text-transparent">
-              看
+              {t('see:title')}
             </h1>
           </div>
-          <h2 className="text-3xl font-semibold mb-4 text-gray-800">See</h2>
+          <h2 className="text-3xl font-semibold mb-4 text-gray-800">{t('common:categories.see')}</h2>
           <p className="text-xl text-gray-600">
-            看見神的榮耀：教堂建築、聖像畫與基督教視覺藝術
+            {t('see:subtitle')}
           </p>
         </div>
 
