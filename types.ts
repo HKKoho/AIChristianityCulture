@@ -361,6 +361,9 @@ export enum AiEngine {
   LOCAL_LLM = 'Local LLM'
 }
 
+// AI Provider Types (for multi-provider service)
+export type AIProvider = 'ollama' | 'gemini' | 'openai';
+
 // Sermon Types
 export enum SermonBasis {
   BIBLICAL_STUDY = 'biblical-study',

@@ -14,8 +14,8 @@
  * - Detailed logging for debugging
  */
 
-import { AIProvider } from '../types';
-import * as UnifiedAPI from '../api/unified';
+// Define AIProvider type locally
+export type AIProvider = 'ollama' | 'gemini' | 'openai';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -72,7 +72,7 @@ export class Chat {
     });
 
     try {
-      const requestMessages: UnifiedAPI.UnifiedMessage[] = [];
+      const requestMessages: ChatMessage[] = [];
 
       if (this.systemInstruction) {
         requestMessages.push({
@@ -83,24 +83,37 @@ export class Chat {
 
       requestMessages.push(...this.messages);
 
-      const response = await UnifiedAPI.chat({
-        messages: requestMessages,
-        temperature: this.temperature,
-        topP: this.topP,
+      // Call the unified API endpoint
+      const response = await fetch('/api/unified', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          provider: this.lastSuccessfulProvider || 'gemini',
+          model: 'gemini-2.0-flash-exp',
+          messages: requestMessages,
+          temperature: this.temperature,
+        }),
       });
 
-      this.lastSuccessfulProvider = response.provider;
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || data.content || '';
 
       this.messages.push({
         role: 'assistant',
-        content: response.content,
+        content,
       });
 
-      console.log(`✅ Response received from ${response.provider} (${response.model})`);
+      console.log(`✅ Response received from API`);
 
-      return response.content;
+      return content;
     } catch (error) {
-      console.error('❌ All providers failed:', error);
+      console.error('❌ API call failed:', error);
       // Remove the user message since it failed
       this.messages.pop();
       throw error;
@@ -115,19 +128,36 @@ export class Chat {
     imageBase64: string,
     prompt: string
   ): Promise<string> {
-    console.log('🖼️ Analyzing image with multi-provider fallback');
+    console.log('🖼️ Analyzing image via API');
 
     try {
-      const response = await UnifiedAPI.analyzeImage(imageBase64, prompt, {
-        temperature: this.temperature,
-        topP: this.topP,
+      const response = await fetch('/api/unified', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          provider: 'gemini',
+          model: 'gemini-2.0-flash-exp',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: this.temperature,
+          image: imageBase64,
+          imageMimeType: 'image/jpeg',
+        }),
       });
 
-      console.log(`✅ Image analyzed by ${response.provider} (${response.model})`);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
 
-      return response.content;
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || data.content || '';
+
+      console.log(`✅ Image analyzed`);
+
+      return content;
     } catch (error) {
-      console.error('❌ Image analysis failed on all providers:', error);
+      console.error('❌ Image analysis failed:', error);
       throw error;
     }
   }
@@ -456,9 +486,20 @@ export async function getProviderStatus(): Promise<{
   };
 }
 
+// Helper functions for backward compatibility
+export function createChatSession(systemInstruction?: string, options?: { temperature?: number; topP?: number }): Chat {
+  return new Chat(systemInstruction, options);
+}
+
+export async function sendChatMessage(chat: Chat, message: string): Promise<string> {
+  return await chat.sendMessage(message);
+}
+
 // Export default for backward compatibility
 export default {
   Chat,
+  createChatSession,
+  sendChatMessage,
   performSearch,
   analyzeText,
   analyzeImage,
