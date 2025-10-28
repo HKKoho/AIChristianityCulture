@@ -1,447 +1,467 @@
 /**
- * Multi-Provider Chat Service with Automatic Fallbacks
- * Tries providers in order: Ollama → Gemini → GPT-4o
- * Provides seamless failover for maximum reliability
+ * Multi-Provider Chat Service with Automatic Fallback
+ *
+ * Provider Priority Chain:
+ * 1. Ollama kimi-k2:1t-cloud (Primary)
+ * 2. Ollama qwen-coder:480b-cloud (Secondary)
+ * 3. Google Gemini 2.0 Flash (Tertiary)
+ * 4. OpenAI GPT-4o (Quaternary)
+ *
+ * Features:
+ * - Automatic provider failover
+ * - Feature-optimized routing (e.g., Gemini for web search)
+ * - Conversation continuity across provider switches
+ * - Detailed logging for debugging
  */
 
-type Provider = 'ollama' | 'gemini' | 'openai';
+import { AIProvider } from '../types';
+import * as UnifiedAPI from '../api/unified';
 
-interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
-interface ProviderConfig {
-  name: Provider;
-  model: string;
-  endpoint: string;
+export interface SearchResult {
+  title: string;
+  snippet: string;
+  link: string;
 }
 
-// Provider configurations in priority order
-const PROVIDER_CONFIGS: ProviderConfig[] = [
-  {
-    name: 'ollama',
-    model: 'qwen-coder:480b-cloud',
-    endpoint: '/api/ollama'
-  },
-  {
-    name: 'gemini',
-    model: 'gemini-2.0-flash-exp',
-    endpoint: '/api/unified'
-  },
-  {
-    name: 'openai',
-    model: 'gpt-4o',
-    endpoint: '/api/unified'
-  }
-];
+export interface ChatResponse {
+  text: string;
+  sources?: SearchResult[];
+  provider?: AIProvider;
+  model?: string;
+}
 
+/**
+ * Chat class with automatic multi-provider fallback
+ */
 export class Chat {
   private messages: ChatMessage[] = [];
-  private wordLimit: number;
   private systemInstruction?: string;
-  private currentProvider: Provider = 'ollama';
-  private providerIndex: number = 0;
+  private temperature: number;
+  private topP: number;
+  private lastSuccessfulProvider?: AIProvider;
 
-  constructor(wordLimit: number = 100, systemInstruction?: string) {
-    this.wordLimit = wordLimit;
+  constructor(
+    systemInstruction?: string,
+    options?: {
+      temperature?: number;
+      topP?: number;
+    }
+  ) {
     this.systemInstruction = systemInstruction;
+    this.temperature = options?.temperature ?? 0.7;
+    this.topP = options?.topP ?? 0.9;
 
-    // Add system instruction as first message if provided
-    if (systemInstruction) {
-      this.messages.push({
-        role: 'system',
-        content: systemInstruction
-      });
-    }
+    console.log('🤖 Multi-Provider Chat initialized');
+    console.log(`📊 Temperature: ${this.temperature}, Top-P: ${this.topP}`);
   }
 
-  private async callProvider(provider: ProviderConfig, userMessage: string): Promise<string> {
-    const messagesToSend = [...this.messages, { role: 'user' as const, content: userMessage }];
+  /**
+   * Send a message with automatic provider fallback
+   */
+  async sendMessage(userMessage: string): Promise<string> {
+    console.log(`💬 Sending message (${this.messages.length} messages in history)`);
 
-    console.log(`🔄 Trying ${provider.name} (${provider.model})...`);
-
-    const response = await fetch(provider.endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        provider: provider.name,
-        model: provider.model,
-        messages: messagesToSend,
-        temperature: 0.7,
-        max_tokens: this.wordLimit * 10,
-        stream: false
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`${provider.name} API error (${response.status}): ${errorText}`);
-    }
-
-    const data = await response.json();
-
-    // Handle different response formats
-    let content = '';
-    if (data.choices && data.choices[0] && data.choices[0].message) {
-      content = data.choices[0].message.content;
-    } else if (data.content) {
-      content = data.content;
-    } else {
-      throw new Error(`Invalid response format from ${provider.name}`);
-    }
-
-    console.log(`✅ ${provider.name} succeeded`);
-    this.currentProvider = provider.name;
-    return content;
-  }
-
-  async sendMessageStream(options: { message: string }) {
-    const { message } = options;
-
-    // Add user message to history
     this.messages.push({
       role: 'user',
-      content: message
+      content: userMessage,
     });
 
-    let lastError: Error | null = null;
-
-    // Try each provider in sequence
-    for (let i = this.providerIndex; i < PROVIDER_CONFIGS.length; i++) {
-      const provider = PROVIDER_CONFIGS[i];
-
-      try {
-        const content = await this.callProvider(provider, message);
-
-        // Success! Add response to history
-        this.messages.push({
-          role: 'assistant',
-          content
-        });
-
-        // Update provider index for next call
-        this.providerIndex = i;
-
-        // Return stream-like object for compatibility
-        return {
-          text: content,
-          stream: (async function* () {
-            yield content;
-          })()
-        };
-
-      } catch (error: any) {
-        console.warn(`⚠️ ${provider.name} failed: ${error.message}`);
-        lastError = error;
-
-        // If this was the last provider, throw the error
-        if (i === PROVIDER_CONFIGS.length - 1) {
-          console.error('❌ All providers failed');
-          throw new Error(`All AI providers failed. Last error: ${error.message}`);
-        }
-
-        // Otherwise, try next provider
-        console.log(`↪️ Falling back to next provider...`);
-        continue;
-      }
-    }
-
-    // This shouldn't happen, but just in case
-    throw lastError || new Error('Failed to get response from any provider');
-  }
-
-  getCurrentProvider(): Provider {
-    return this.currentProvider;
-  }
-
-  getProviderStatus(): string {
-    return `Using ${this.currentProvider} (${PROVIDER_CONFIGS[this.providerIndex].model})`;
-  }
-}
-
-export const createChatSession = (wordLimit: number = 100): Chat | null => {
-  const systemInstruction = `You are a Cultural Explorer Assistant, an AI expert on Christian cultural traditions, history, and practices.
-
-Your expertise covers:
-- Christian food traditions, communion, agape feasts, and biblical meals
-- Pilgrimage routes, holy sites, and biblical locations
-- Sacred music, hymns, chants, and worship traditions
-- Christian art, icons, architecture, and visual culture
-- Biblical manuscripts, church fathers, and theological literature
-- Christian meditation, contemplative prayer, and spiritual practices
-
-You are knowledgeable, respectful, and culturally sensitive. Answer questions with historical accuracy, theological depth, and pastoral wisdom. Use markdown for formatting when appropriate. Always be helpful and encouraging in exploring the richness of Christian cultural heritage.
-
-IMPORTANT: Limit each response to approximately ${wordLimit} words unless the user explicitly asks for more details or a longer explanation. Be concise and focused on the most essential information.
-
-Respond primarily in Traditional Chinese (繁體中文) unless the user writes in English.`;
-
-  try {
-    return new Chat(wordLimit, systemInstruction);
-  } catch (error) {
-    console.error('Failed to create chat session:', error);
-    return null;
-  }
-};
-
-export const sendChatMessage = async (
-  chat: Chat,
-  message: string
-): Promise<any> => {
-  if (!chat) {
-    throw new Error('Chat session not initialized');
-  }
-
-  return chat.sendMessageStream({ message });
-};
-
-export const isServiceAvailable = (): boolean => {
-  return true; // At least one provider should be available
-};
-
-async function callUnifiedAPI(
-  provider: Provider,
-  model: string,
-  prompt: string,
-  wordLimit: number
-): Promise<string> {
-  const response = await fetch('/api/unified', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      provider,
-      model,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: wordLimit * 10,
-      stream: false
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`${provider} API error: ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.content || data.choices?.[0]?.message?.content || 'Unable to get response';
-}
-
-export const analyzeImage = async (
-  imageBase64: string,
-  mimeType: string,
-  categoryContext?: string,
-  wordLimit: number = 100
-): Promise<string> => {
-  const contextPrompt = categoryContext
-    ? `Analyze this image in the context of ${categoryContext}.`
-    : 'Analyze this image for its cultural and historical context in Christianity.';
-
-  const prompt = `${contextPrompt}
-
-IMPORTANT: Limit your response to approximately ${wordLimit} words. Be concise and focused.
-
-Briefly describe key rituals, symbols, art, architecture, or historical significance. Explain their theological meaning and cultural importance. Present your findings in a clear format using markdown. Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.`;
-
-  // Try Gemini first for image analysis (best vision capabilities)
-  const providers: Array<{ name: Provider; model: string; supportsVision: boolean }> = [
-    { name: 'gemini', model: 'gemini-2.0-flash-exp', supportsVision: true },
-    { name: 'openai', model: 'gpt-4o', supportsVision: true },
-    { name: 'ollama', model: 'llava:34b', supportsVision: true }
-  ];
-
-  let lastError: Error | null = null;
-
-  for (const provider of providers) {
     try {
-      console.log(`🔄 Trying ${provider.name} for image analysis...`);
+      const requestMessages: UnifiedAPI.UnifiedMessage[] = [];
 
-      const response = await fetch('/api/unified', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          provider: provider.name,
-          model: provider.model,
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-              image: imageBase64,
-              imageMimeType: mimeType
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: wordLimit * 10,
-          stream: false
-        })
+      if (this.systemInstruction) {
+        requestMessages.push({
+          role: 'system',
+          content: this.systemInstruction,
+        });
+      }
+
+      requestMessages.push(...this.messages);
+
+      const response = await UnifiedAPI.chat({
+        messages: requestMessages,
+        temperature: this.temperature,
+        topP: this.topP,
       });
 
-      if (!response.ok) {
-        throw new Error(`${provider.name} error: ${response.statusText}`);
-      }
+      this.lastSuccessfulProvider = response.provider;
 
-      const data = await response.json();
-      const content = data.content || data.choices?.[0]?.message?.content;
+      this.messages.push({
+        role: 'assistant',
+        content: response.content,
+      });
 
-      if (content) {
-        console.log(`✅ ${provider.name} image analysis succeeded`);
-        return content;
-      }
+      console.log(`✅ Response received from ${response.provider} (${response.model})`);
 
-      throw new Error('No content in response');
-
-    } catch (error: any) {
-      console.warn(`⚠️ ${provider.name} image analysis failed: ${error.message}`);
-      lastError = error;
-      continue;
+      return response.content;
+    } catch (error) {
+      console.error('❌ All providers failed:', error);
+      // Remove the user message since it failed
+      this.messages.pop();
+      throw error;
     }
   }
 
-  throw new Error(`Image analysis failed with all providers. Last error: ${lastError?.message}`);
-};
+  /**
+   * Analyze an image with automatic provider fallback
+   * Priority: Gemini (best vision) → GPT-4o → Ollama (llava)
+   */
+  async analyzeImage(
+    imageBase64: string,
+    prompt: string
+  ): Promise<string> {
+    console.log('🖼️ Analyzing image with multi-provider fallback');
 
-export const analyzeText = async (
-  text: string,
-  categoryContext?: string,
-  wordLimit: number = 100
-): Promise<string> => {
-  const contextPrompt = categoryContext
-    ? `Analyze the following text in the context of ${categoryContext}.`
-    : 'Analyze the following text for its cultural and historical context in Christianity.';
-
-  const prompt = `${contextPrompt}
-
-IMPORTANT: Limit your response to approximately ${wordLimit} words. Be concise and focused.
-
-Briefly identify the most relevant:
-- Biblical references and theological concepts
-- Historical periods, events, or figures
-- Cultural practices and traditions
-- Symbolic meanings and spiritual significance
-
-Explain their key importance and connections to Christian faith and practice. Present findings concisely using markdown.
-
-Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.
-
-Text to analyze:
----
-${text}`;
-
-  // Try providers in order
-  const providers: Array<{ name: Provider; model: string }> = [
-    { name: 'ollama', model: 'qwen-coder:480b-cloud' },
-    { name: 'gemini', model: 'gemini-2.0-flash-exp' },
-    { name: 'openai', model: 'gpt-4o' }
-  ];
-
-  let lastError: Error | null = null;
-
-  for (const provider of providers) {
     try {
-      const result = await callUnifiedAPI(provider.name, provider.model, prompt, wordLimit);
-      console.log(`✅ ${provider.name} text analysis succeeded`);
-      return result;
-    } catch (error: any) {
-      console.warn(`⚠️ ${provider.name} text analysis failed: ${error.message}`);
-      lastError = error;
-      continue;
+      const response = await UnifiedAPI.analyzeImage(imageBase64, prompt, {
+        temperature: this.temperature,
+        topP: this.topP,
+      });
+
+      console.log(`✅ Image analyzed by ${response.provider} (${response.model})`);
+
+      return response.content;
+    } catch (error) {
+      console.error('❌ Image analysis failed on all providers:', error);
+      throw error;
     }
   }
 
-  throw new Error(`Text analysis failed with all providers. Last error: ${lastError?.message}`);
-};
+  /**
+   * Get conversation history
+   */
+  getHistory(): ChatMessage[] {
+    return [...this.messages];
+  }
 
-export interface GroundingChunk {
-  web: {
-    uri: string;
-    title: string;
+  /**
+   * Clear conversation history
+   */
+  clearHistory(): void {
+    this.messages = [];
+    console.log('🗑️ Conversation history cleared');
+  }
+
+  /**
+   * Get the last successful provider
+   */
+  getLastProvider(): AIProvider | undefined {
+    return this.lastSuccessfulProvider;
+  }
+}
+
+/**
+ * Perform a web search with automatic fallback
+ * Prioritizes Gemini (has built-in web search with sources)
+ */
+export async function performSearch(
+  query: string,
+  options?: {
+    temperature?: number;
+    topP?: number;
+    maxLength?: number;
+  }
+): Promise<ChatResponse> {
+  const maxLength = options?.maxLength || 500;
+
+  console.log('🔍 Performing search with multi-provider fallback');
+  console.log(`📏 Max length: ${maxLength} words`);
+
+  // Try Gemini first (has web search capability)
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+
+  if (GEMINI_API_KEY) {
+    try {
+      console.log('🔄 Trying Gemini with web search (优先选择)');
+      const response = await performSearchWithGemini(query, maxLength, options);
+      console.log('✅ Success with Gemini web search');
+      return response;
+    } catch (error) {
+      console.log('⚠️ Gemini search failed, falling back to Ollama');
+    }
+  }
+
+  // Fallback to Ollama (knowledge-based, no web search)
+  try {
+    console.log('🔄 Trying Ollama (knowledge-based)');
+    const response = await performSearchWithOllama(query, maxLength, options);
+    console.log('✅ Success with Ollama');
+    return response;
+  } catch (error) {
+    console.log('⚠️ Ollama failed, trying GPT-4o');
+  }
+
+  // Final fallback to GPT-4o
+  try {
+    console.log('🔄 Trying GPT-4o');
+    const response = await performSearchWithOpenAI(query, maxLength, options);
+    console.log('✅ Success with GPT-4o');
+    return response;
+  } catch (error) {
+    throw new Error('Search failed on all providers');
+  }
+}
+
+/**
+ * Search with Gemini (has web search)
+ */
+async function performSearchWithGemini(
+  query: string,
+  maxLength: number,
+  options?: { temperature?: number; topP?: number }
+): Promise<ChatResponse> {
+  const { GoogleGenerativeAI } = await import('@google/generative-ai');
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+
+  const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash-exp',
+    generationConfig: {
+      temperature: options?.temperature ?? 0.7,
+      topP: options?.topP ?? 0.9,
+    },
+  });
+
+  const chat = model.startChat({
+    history: [],
+    tools: [{
+      googleSearch: {}
+    }],
+  });
+
+  const enhancedQuery = `請回答以下問題（限制在 ${maxLength} 字以內）：
+
+${query}
+
+請提供準確、簡潔的回答，並在適當時引用來源。`;
+
+  const result = await chat.sendMessage(enhancedQuery);
+  const response = result.response;
+
+  // Extract grounding sources if available
+  const sources: SearchResult[] = [];
+  const groundingMetadata = (response as any).candidates?.[0]?.groundingMetadata;
+
+  if (groundingMetadata?.groundingSupports) {
+    for (const support of groundingMetadata.groundingSupports) {
+      if (support.groundingChunkIndices && support.segment) {
+        for (const chunkIndex of support.groundingChunkIndices) {
+          const chunk = groundingMetadata.groundingChunks?.[chunkIndex];
+          if (chunk?.web) {
+            sources.push({
+              title: chunk.web.title || chunk.web.uri,
+              snippet: support.segment.text || '',
+              link: chunk.web.uri,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    text: response.text(),
+    sources: sources.length > 0 ? sources : undefined,
+    provider: AIProvider.GEMINI,
+    model: 'gemini-2.0-flash-exp',
   };
 }
 
-export interface SearchResult {
-  text: string;
-  sources: GroundingChunk[];
+/**
+ * Search with Ollama (knowledge-based, no web search)
+ */
+async function performSearchWithOllama(
+  query: string,
+  maxLength: number,
+  options?: { temperature?: number; topP?: number }
+): Promise<ChatResponse> {
+  const enhancedQuery = `請回答以下問題（限制在 ${maxLength} 字以內）：
+
+${query}
+
+注意：請基於你的知識提供準確的回答。如果不確定，請明確說明。`;
+
+  const response = await UnifiedAPI.chat({
+    messages: [
+      { role: 'user', content: enhancedQuery }
+    ],
+    temperature: options?.temperature ?? 0.7,
+    topP: options?.topP ?? 0.9,
+    model: 'kimi-k2:1t-cloud', // Use primary model
+  });
+
+  return {
+    text: response.content,
+    provider: response.provider,
+    model: response.model,
+  };
 }
 
-export const performSearch = async (
+/**
+ * Search with OpenAI GPT-4o
+ */
+async function performSearchWithOpenAI(
   query: string,
-  categoryContext?: string,
-  wordLimit: number = 100
-): Promise<SearchResult> => {
-  const contextPrompt = categoryContext
-    ? `Regarding the cultural or historical context of ${categoryContext}, answer the following question: "${query}".`
-    : `Regarding Christian cultural and historical context, answer the following question: "${query}".`;
+  maxLength: number,
+  options?: { temperature?: number; topP?: number }
+): Promise<ChatResponse> {
+  const enhancedQuery = `請回答以下問題（限制在 ${maxLength} 字以內）：
 
-  const fullQuery = `${contextPrompt}
+${query}
 
-IMPORTANT: Limit your response to approximately ${wordLimit} words. Be concise and focused on the most essential information.
+請提供準確、簡潔的回答。`;
 
-Provide a brief answer with key historical details, theological significance, and cultural context. Use markdown for formatting. Respond in Traditional Chinese (繁體中文) with English terms in parentheses where appropriate.`;
+  const response = await UnifiedAPI.chat({
+    messages: [
+      { role: 'user', content: enhancedQuery }
+    ],
+    temperature: options?.temperature ?? 0.7,
+    topP: options?.topP ?? 0.9,
+  });
 
-  // Try providers in order with Gemini first (has web search capability)
-  const providers: Array<{ name: Provider; model: string; hasWebSearch: boolean }> = [
-    { name: 'gemini', model: 'gemini-2.0-flash-exp', hasWebSearch: true },
-    { name: 'ollama', model: 'qwen-coder:480b-cloud', hasWebSearch: false },
-    { name: 'openai', model: 'gpt-4o', hasWebSearch: false }
-  ];
+  return {
+    text: response.content,
+    provider: response.provider,
+    model: response.model,
+  };
+}
 
-  let lastError: Error | null = null;
-
-  for (const provider of providers) {
-    try {
-      console.log(`🔄 Trying ${provider.name} for search...`);
-
-      const response = await fetch('/api/unified', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          provider: provider.name,
-          model: provider.model,
-          messages: [
-            {
-              role: 'user',
-              content: fullQuery
-            }
-          ],
-          temperature: 0.7,
-          max_tokens: wordLimit * 10,
-          enableWebSearch: provider.hasWebSearch,
-          stream: false
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`${provider.name} error (${response.status}): ${await response.text()}`);
-      }
-
-      const data = await response.json();
-      const text = data.content || data.choices?.[0]?.message?.content || 'Unable to perform search';
-
-      // Extract sources if available (mainly from Gemini)
-      const sources: GroundingChunk[] = data.sources || [];
-
-      console.log(`✅ ${provider.name} search succeeded`);
-      return { text, sources };
-
-    } catch (error: any) {
-      console.warn(`⚠️ ${provider.name} search failed: ${error.message}`);
-      lastError = error;
-      continue;
-    }
+/**
+ * Analyze text with automatic fallback
+ */
+export async function analyzeText(
+  prompt: string,
+  options?: {
+    temperature?: number;
+    topP?: number;
+    systemInstruction?: string;
   }
+): Promise<ChatResponse> {
+  console.log('📝 Analyzing text with multi-provider fallback');
 
-  throw new Error(`Search failed with all providers. Last error: ${lastError?.message}`);
+  try {
+    const messages: UnifiedAPI.UnifiedMessage[] = [];
+
+    if (options?.systemInstruction) {
+      messages.push({
+        role: 'system',
+        content: options.systemInstruction,
+      });
+    }
+
+    messages.push({
+      role: 'user',
+      content: prompt,
+    });
+
+    const response = await UnifiedAPI.chat({
+      messages,
+      temperature: options?.temperature ?? 0.7,
+      topP: options?.topP ?? 0.9,
+    });
+
+    console.log(`✅ Text analyzed by ${response.provider} (${response.model})`);
+
+    return {
+      text: response.content,
+      provider: response.provider,
+      model: response.model,
+    };
+  } catch (error) {
+    console.error('❌ Text analysis failed on all providers:', error);
+    throw error;
+  }
+}
+
+/**
+ * Analyze an image (standalone function)
+ */
+export async function analyzeImage(
+  imageBase64: string,
+  prompt: string,
+  options?: {
+    temperature?: number;
+    topP?: number;
+  }
+): Promise<ChatResponse> {
+  console.log('🖼️ Analyzing image (standalone)');
+
+  try {
+    const response = await UnifiedAPI.analyzeImage(imageBase64, prompt, {
+      temperature: options?.temperature ?? 0.7,
+      topP: options?.topP ?? 0.9,
+    });
+
+    return {
+      text: response.content,
+      provider: response.provider,
+      model: response.model,
+    };
+  } catch (error) {
+    console.error('❌ Image analysis failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * Check which providers are currently available
+ */
+export async function checkAvailableProviders(): Promise<{
+  ollama: boolean;
+  gemini: boolean;
+  openai: boolean;
+}> {
+  const available = await UnifiedAPI.checkAvailableProviders();
+  console.log('🏥 Provider availability:', available);
+  return available;
+}
+
+/**
+ * Get provider status with detailed information
+ */
+export async function getProviderStatus(): Promise<{
+  primary: { name: string; available: boolean; model: string };
+  secondary: { name: string; available: boolean; model: string };
+  tertiary: { name: string; available: boolean; model: string };
+  quaternary: { name: string; available: boolean; model: string };
+}> {
+  const available = await checkAvailableProviders();
+
+  return {
+    primary: {
+      name: 'Ollama (Kimi K2)',
+      available: available.ollama,
+      model: 'kimi-k2:1t-cloud',
+    },
+    secondary: {
+      name: 'Ollama (Qwen Coder)',
+      available: available.ollama,
+      model: 'qwen-coder:480b-cloud',
+    },
+    tertiary: {
+      name: 'Google Gemini',
+      available: available.gemini,
+      model: 'gemini-2.0-flash-exp',
+    },
+    quaternary: {
+      name: 'OpenAI GPT-4o',
+      available: available.openai,
+      model: 'gpt-4o',
+    },
+  };
+}
+
+// Export default for backward compatibility
+export default {
+  Chat,
+  performSearch,
+  analyzeText,
+  analyzeImage,
+  checkAvailableProviders,
+  getProviderStatus,
 };

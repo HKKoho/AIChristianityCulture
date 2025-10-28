@@ -104,70 +104,47 @@ async function callOpenAI(request: ChatRequest): Promise<ChatResponse> {
 }
 
 /**
- * Call Google Gemini API
+ * Call Google Gemini API with automatic fallback to Ollama
+ * Uses unified endpoint with multi-provider failover
  */
 async function callGemini(request: ChatRequest): Promise<ChatResponse> {
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-
-  if (!GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY is not configured. Please add it to .env.local to use Gemini models.');
-  }
-
   try {
-    // Convert messages to Gemini format
-    const geminiMessages = request.messages
-      .filter(m => m.role !== 'system')
-      .map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-      }));
+    console.log('🔄 Using multi-provider endpoint with automatic failover...');
 
-    // Extract system message if exists
-    const systemMessage = request.messages.find(m => m.role === 'system');
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${request.model}:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: geminiMessages,
-          systemInstruction: systemMessage ? {
-            parts: [{ text: systemMessage.content }]
-          } : undefined,
-          generationConfig: {
-            temperature: request.temperature,
-            topP: request.topP,
-            maxOutputTokens: 2000
-          }
-        })
-      }
-    );
+    // Use unified API endpoint with automatic provider fallback
+    // Priority: Ollama (kimi-k2:1t-cloud) → Ollama (qwen-coder:480b-cloud) → Gemini → GPT-4o
+    const response = await fetch('/api/unified/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        messages: request.messages,
+        temperature: request.temperature,
+        topP: request.topP,
+        maxTokens: 2000
+      })
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Gemini API error (${response.status}): ${errorText}`);
+      throw new Error(`Multi-provider API error (${response.status}): ${errorText}`);
     }
 
     const data = await response.json();
 
-    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-      const content = data.candidates[0].content.parts
-        .map((part: any) => part.text)
-        .join('');
-
+    if (data.content) {
+      console.log(`✅ Response received from ${data.provider} (${data.model})`);
       return {
-        content,
-        model: request.model
+        content: data.content,
+        model: data.model || request.model
       };
     }
 
-    throw new Error('Invalid response format from Gemini API');
+    throw new Error('Invalid response format from multi-provider API');
   } catch (error: any) {
-    console.error('Gemini API error:', error);
-    throw new Error(`Failed to get response from Gemini: ${error.message}`);
+    console.error('Multi-provider API error:', error);
+    throw new Error(`Failed to get response: ${error.message}`);
   }
 }
 

@@ -1,341 +1,511 @@
-# Multi-Provider AI System with Automatic Fallbacks
+# Multi-Provider AI System with Automatic Fallback
 
-This application now features an intelligent multi-provider AI system that automatically falls back to alternative providers if the primary one fails. This ensures maximum reliability and uptime.
+## Overview
+
+This AI Theology application now features an intelligent multi-provider AI system with automatic failover across **four** AI providers. If one provider fails (API error, location restriction, timeout), the system automatically tries the next one in the priority chain.
 
 ## Provider Priority Chain
 
-The system tries providers in this order:
+The system follows this priority order:
 
-1. **Ollama Cloud** (Primary) - `qwen-coder:480b-cloud`
-   - Fast and cost-effective
-   - Good for most queries
+1. **🥇 Primary: Ollama Cloud - Kimi K2 1T**
+   - Model: `kimi-k2:1t-cloud`
+   - Best for: Deep theological analysis with massive parameter count
+   - Ultra-large model with superior understanding and generation
 
-2. **Google Gemini** (Secondary) - `gemini-2.0-flash-exp`
-   - Excellent vision capabilities
-   - Built-in web search support
-   - Better for complex reasoning
+2. **🥈 Secondary: Ollama Cloud - Qwen Coder 480B**
+   - Model: `qwen-coder:480b-cloud`
+   - Best for: Structured sermon content generation
+   - Excellent at creating organized, well-formatted output
 
-3. **OpenAI GPT-4o** (Tertiary) - `gpt-4o`
-   - Most reliable fallback
-   - Excellent general performance
-   - Premium tier backup
+3. **🥉 Tertiary: Google Gemini 2.0 Flash**
+   - Model: `gemini-2.0-flash-exp`
+   - Best for: Web search with grounding sources
+   - Only provider with built-in web search capability
 
-## How It Works
+4. **4️⃣ Quaternary: OpenAI GPT-4o**
+   - Model: `gpt-4o`
+   - Best for: Reliable fallback with strong general capabilities
+   - Final safety net when all other providers fail
 
-### Automatic Failover
+## Architecture
 
-When you make a request:
-
-1. System tries **Ollama** first
-2. If Ollama fails (API error, timeout, location restriction, etc.), automatically tries **Gemini**
-3. If Gemini also fails, falls back to **GPT-4o**
-4. Only returns error if ALL providers fail
-
-### Console Logging
-
-The system provides detailed console logs:
+### Core Components
 
 ```
-🔄 Trying ollama (qwen-coder:480b-cloud)...
-⚠️ ollama failed: User location is not supported for the API use.
-↪️ Falling back to next provider...
-🔄 Trying gemini (gemini-2.0-flash-exp)...
-✅ gemini succeeded
+┌─────────────────────────────────────────────────────────────┐
+│                       Application Layer                      │
+│                     (React Components)                       │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│          Multi-Provider Chat Service                        │
+│      (services/multiProviderChatService.ts)                 │
+│  • Automatic failover logic                                 │
+│  • Conversation continuity                                  │
+│  • Feature-optimized routing                                │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────────┐
+│              Unified API Layer                              │
+│              (api/unified.ts)                               │
+│  • Provider abstraction                                     │
+│  • Response normalization                                   │
+│  • Error handling                                           │
+└───────┬──────────┬──────────┬─────────────────────────────┘
+        │          │          │
+   ┌────▼───┐ ┌───▼────┐ ┌───▼────┐
+   │ Ollama │ │ Gemini │ │ OpenAI │
+   │  API   │ │  API   │ │  API   │
+   └────────┘ └────────┘ └────────┘
 ```
 
-## Feature-Specific Optimizations
+### File Structure
 
-### Search (`performSearch`)
-- Tries **Gemini first** (has built-in web search with grounding sources)
-- Falls back to Ollama, then GPT-4o
-- Returns sources when available (Gemini only)
+```
+/api
+  ├── ollama.ts          # Direct Ollama API proxy
+  └── unified.ts         # Multi-provider unified API with fallback
 
-### Image Analysis (`analyzeImage`)
-- Tries **Gemini first** (best vision model)
-- Falls back to GPT-4o (also excellent vision)
-- Finally tries Ollama with `llava:34b` (if available)
+/services
+  ├── ollamaChatService.ts           # Ollama-specific chat service
+  └── multiProviderChatService.ts    # Main multi-provider service
 
-### Text Analysis & Chat
-- Standard priority: Ollama → Gemini → GPT-4o
-- Maintains conversation history across provider switches
+/types.ts                # Type definitions
+  ├── LocalLLMConfig     # LLM configuration interface
+  ├── AIProvider         # Provider enum
+  └── SERMON_LLM_MODELS  # Available models list
+
+/dev-api-server.mjs      # Development proxy server
+  ├── /api/chat          # Single provider endpoint
+  ├── /api/unified/chat  # Multi-provider with fallback
+  └── /api/ollama/chat   # Ollama-specific endpoint
+```
 
 ## Configuration
 
 ### Environment Variables
 
-Required API keys in `.env.local`:
+Create a `.env.local` file in the project root:
 
 ```bash
-# Ollama Cloud (Primary)
-OLLAMA_API_KEY=your_ollama_api_key_here
+# Ollama Cloud (Primary & Secondary)
+OLLAMA_API_KEY=your_ollama_api_key
 OLLAMA_API_URL=https://api.ollama.cloud
 
-# Google Gemini (Secondary)
-GEMINI_API_KEY=your_gemini_api_key_here
+# Google Gemini (Tertiary)
+GEMINI_API_KEY=your_gemini_api_key
 
-# OpenAI (Tertiary - Fallback)
-OPENAI_API_KEY=your_openai_api_key_here
+# OpenAI (Quaternary)
+OPENAI_API_KEY=your_openai_api_key
 ```
 
-**Note:** You don't need ALL keys. The system will skip providers without configured keys.
+**Minimum requirement:** At least **ONE** provider API key must be configured.
 
-### Minimum Requirements
+### Model Configuration
 
-For basic functionality:
-- **At least ONE provider** must be configured
-- Recommended: Configure at least 2 for reliability
-
-### Cost Optimization
-
-If you want to minimize costs:
-1. Only configure Ollama (cheapest)
-2. Add Gemini as free tier backup
-3. Only add GPT-4o if you need maximum reliability
-
-## API Endpoints
-
-### `/api/unified` (Recommended)
-
-Unified endpoint for all providers:
+Default models are defined in `types.ts`:
 
 ```typescript
-POST /api/unified
-
-Body:
-{
-  "provider": "ollama" | "gemini" | "openai",
-  "model": "model-name",
-  "messages": [...],
-  "temperature": 0.7,
-  "max_tokens": 2000,
-  "enableWebSearch": true,  // Gemini only
-  "image": "base64...",      // For vision
-  "imageMimeType": "image/jpeg"
-}
+export const DEFAULT_LOCAL_LLM_CONFIG: LocalLLMConfig = {
+  model: 'kimi-k2:1t-cloud',  // Primary model
+  temperature: 0.7,
+  topP: 0.9
+};
 ```
 
-### `/api/ollama` (Direct)
+## Usage Examples
 
-Direct Ollama endpoint (no fallback):
-
-```typescript
-POST /api/ollama
-
-Body:
-{
-  "model": "qwen-coder:480b-cloud",
-  "messages": [...],
-  "temperature": 0.7,
-  "max_tokens": 2000
-}
-```
-
-## Services
-
-### `multiProviderChatService.ts`
-
-Main service with automatic fallbacks. Exports:
-
-- `createChatSession(wordLimit)` - Creates chat with fallback support
-- `sendChatMessage(chat, message)` - Sends message with auto-retry
-- `performSearch(query, context, wordLimit)` - Search with Gemini priority
-- `analyzeImage(base64, mimeType, context, wordLimit)` - Vision with fallbacks
-- `analyzeText(text, context, wordLimit)` - Text analysis with fallbacks
-
-### Chat Class Methods
-
-```typescript
-const chat = createChatSession(100);
-
-// Send message (auto-fallback)
-const response = await chat.sendMessageStream({ message: "Hello" });
-
-// Check current provider
-console.log(chat.getCurrentProvider());  // "ollama" | "gemini" | "openai"
-
-// Get status
-console.log(chat.getProviderStatus());  // "Using ollama (qwen-coder:480b-cloud)"
-```
-
-## Components Using Multi-Provider
-
-All these components now have automatic fallback:
-
-1. **AISearch.tsx** - AI-powered search
-2. **CulturalExplorer.tsx** - Chat interface
-3. **ModelContextProtocol.tsx** - Image/text analysis
-
-## Testing Fallback Behavior
-
-### Test 1: Simulate Ollama Failure
-
-1. Remove `OLLAMA_API_KEY` from `.env.local`
-2. Restart dev server
-3. Try a search - should automatically use Gemini
-
-### Test 2: Simulate Multiple Failures
-
-1. Set invalid keys for Ollama and Gemini
-2. Keep OpenAI key valid
-3. Try a search - should fall back to GPT-4o
-
-### Test 3: All Providers Available
-
-1. Configure all three API keys
-2. Monitor console logs
-3. Should primarily use Ollama (most cost-effective)
-
-## Development
-
-### Local Development
-
-```bash
-# Start API proxy server (handles all providers)
-npm run dev:api
-
-# Start Vite dev server
-npm run dev
-
-# Or run both together
-npm run dev:full
-```
-
-### Production (Vercel)
-
-Set environment variables in Vercel dashboard:
-
-1. Go to Project Settings → Environment Variables
-2. Add all three provider keys:
-   - `OLLAMA_API_KEY`
-   - `OLLAMA_API_URL`
-   - `GEMINI_API_KEY`
-   - `OPENAI_API_KEY`
-3. Deploy
-
-## Error Handling
-
-### Provider-Specific Errors
-
-The system handles:
-- **Location restrictions** (Gemini: "User location not supported")
-- **Rate limits** (automatically switches provider)
-- **API timeouts** (tries next provider)
-- **Invalid API keys** (skips to next provider)
-- **Model not available** (falls back)
-
-### Final Error
-
-If ALL providers fail:
-```
-Error: All AI providers failed. Last error: [error message]
-```
-
-## Provider Comparison
-
-| Feature | Ollama | Gemini | GPT-4o |
-|---------|--------|--------|--------|
-| **Cost** | Low | Free tier | High |
-| **Speed** | Fast | Very Fast | Fast |
-| **Vision** | Limited (llava) | Excellent | Excellent |
-| **Web Search** | ❌ | ✅ | ❌ |
-| **Reliability** | Good | Good | Excellent |
-| **Best For** | Text, Code | Search, Vision | Premium backup |
-
-## Provider Selection Logic
-
-```
-┌─────────────────┐
-│  User Request   │
-└────────┬────────┘
-         │
-         ▼
-    ┌────────┐
-    │ Ollama │ ◄── Try first (cost-effective)
-    └───┬────┘
-        │ ❌ Failed
-        ▼
-    ┌────────┐
-    │ Gemini │ ◄── Fallback (web search, vision)
-    └───┬────┘
-        │ ❌ Failed
-        ▼
-    ┌─────────┐
-    │ GPT-4o  │ ◄── Final fallback (most reliable)
-    └───┬─────┘
-        │
-        ▼
-    ┌─────────┐     ┌────────┐
-    │ Success │ OR  │ Error  │
-    └─────────┘     └────────┘
-```
-
-## Monitoring
-
-### Console Indicators
-
-- `🔄` Trying provider
-- `✅` Provider succeeded
-- `⚠️` Provider failed, falling back
-- `↪️` Switching to next provider
-- `❌` All providers failed
-
-### Provider Status
-
-Check which provider is being used:
+### Basic Chat with Automatic Fallback
 
 ```typescript
 import { Chat } from './services/multiProviderChatService';
 
-const chat = new Chat(100);
-// ... after sending messages
-console.log(chat.getCurrentProvider());  // Current active provider
-console.log(chat.getProviderStatus());   // Detailed status
+const chat = new Chat(
+  'You are a helpful theology assistant.',
+  { temperature: 0.7, topP: 0.9 }
+);
+
+const response = await chat.sendMessage('Explain the Trinity.');
+console.log(response);  // Automatically uses best available provider
+```
+
+### Web Search (Prioritizes Gemini)
+
+```typescript
+import { performSearch } from './services/multiProviderChatService';
+
+const result = await performSearch(
+  'Latest developments in theological education',
+  { maxLength: 500 }
+);
+
+console.log(result.text);
+console.log(result.sources);  // Grounding sources (if Gemini was used)
+console.log(result.provider);  // 'gemini', 'ollama', or 'openai'
+```
+
+### Text Analysis
+
+```typescript
+import { analyzeText } from './services/multiProviderChatService';
+
+const result = await analyzeText(
+  'Analyze the theological themes in Romans 8',
+  {
+    temperature: 0.5,
+    systemInstruction: 'You are a biblical scholar.'
+  }
+);
+
+console.log(result.text);
+console.log(`Used provider: ${result.provider}`);
+```
+
+### Image Analysis
+
+```typescript
+import { analyzeImage } from './services/multiProviderChatService';
+
+const result = await analyzeImage(
+  imageBase64String,
+  'Describe the theological symbolism in this artwork',
+  { temperature: 0.6 }
+);
+
+console.log(result.text);
+```
+
+## API Endpoints
+
+### Development Server
+
+Start the development API server:
+
+```bash
+node dev-api-server.mjs
+```
+
+The server runs on `http://localhost:3001` with three endpoints:
+
+#### 1. Single Provider (`/api/chat`)
+
+```bash
+curl -X POST http://localhost:3001/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "ollama",
+    "model": "kimi-k2:1t-cloud",
+    "messages": [
+      {"role": "user", "content": "Hello"}
+    ],
+    "temperature": 0.7,
+    "topP": 0.9
+  }'
+```
+
+#### 2. Multi-Provider with Fallback (`/api/unified/chat`)
+
+```bash
+curl -X POST http://localhost:3001/api/unified/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "Explain justification by faith"}
+    ],
+    "temperature": 0.7,
+    "topP": 0.9,
+    "maxTokens": 4096
+  }'
+```
+
+**Response:**
+```json
+{
+  "content": "Justification by faith is...",
+  "provider": "ollama",
+  "model": "kimi-k2:1t-cloud",
+  "usage": {
+    "promptTokens": 15,
+    "completionTokens": 324,
+    "totalTokens": 339
+  }
+}
+```
+
+#### 3. Ollama-Specific (`/api/ollama/chat`)
+
+```bash
+curl -X POST http://localhost:3001/api/ollama/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen-coder:480b-cloud",
+    "messages": [
+      {"role": "user", "content": "Generate a sermon outline"}
+    ]
+  }'
+```
+
+## Failover Behavior
+
+### Scenario 1: All Providers Available
+
+```
+User Request
+    ↓
+Try Ollama (kimi-k2:1t-cloud)
+    ✅ Success
+    ↓
+Return Response
+```
+
+### Scenario 2: Primary Provider Fails
+
+```
+User Request
+    ↓
+Try Ollama (kimi-k2:1t-cloud)
+    ❌ Failed (API Error)
+    ↓
+Try Ollama (qwen-coder:480b-cloud)
+    ✅ Success
+    ↓
+Return Response
+```
+
+### Scenario 3: Ollama Unavailable
+
+```
+User Request
+    ↓
+Try Ollama (kimi-k2:1t-cloud)
+    ❌ Failed (No API Key)
+    ↓
+Try Ollama (qwen-coder:480b-cloud)
+    ❌ Failed (No API Key)
+    ↓
+Try Gemini (gemini-2.0-flash-exp)
+    ✅ Success
+    ↓
+Return Response
+```
+
+### Scenario 4: All Providers Fail
+
+```
+User Request
+    ↓
+Try all providers...
+    ❌ All Failed
+    ↓
+Throw Error with details:
+  - Ollama (kimi-k2:1t-cloud): Connection timeout
+  - Ollama (qwen-coder:480b-cloud): Connection timeout
+  - Gemini: API quota exceeded
+  - OpenAI: Invalid API key
+```
+
+## Error Handling
+
+The system provides detailed error information:
+
+```typescript
+try {
+  const response = await chat.sendMessage('Hello');
+} catch (error) {
+  console.error('All providers failed:');
+  console.error(error.message);
+  // Output:
+  // All AI providers failed:
+  // ollama (kimi-k2:1t-cloud): Connection timeout
+  // ollama (qwen-coder:480b-cloud): Connection timeout
+  // gemini: API quota exceeded
+  // openai: Invalid API key
+}
+```
+
+## Console Logging
+
+The system provides transparent logging for debugging:
+
+```
+🔄 Trying Ollama with kimi-k2:1t-cloud...
+✅ Success with Ollama (kimi-k2:1t-cloud)
+
+// Or on failure:
+🔄 Trying Ollama with kimi-k2:1t-cloud...
+⚠️ Ollama (kimi-k2:1t-cloud) failed: Connection timeout
+↪️ Falling back to Ollama (qwen-coder:480b-cloud)
+🔄 Trying Ollama with qwen-coder:480b-cloud...
+✅ Success with Ollama (qwen-coder:480b-cloud)
+```
+
+## Feature-Optimized Routing
+
+Different features use different provider priorities:
+
+### Standard Chat & Text Analysis
+**Priority:** Ollama → Gemini → OpenAI
+- Cost-effective with Ollama first
+- Leverages massive parameter counts
+
+### Web Search
+**Priority:** Gemini → Ollama → OpenAI
+- Gemini has built-in web search with sources
+- Returns grounding metadata
+
+### Image Analysis (Vision)
+**Priority:** Gemini → OpenAI → Ollama (llava:34b)
+- Gemini has best vision capabilities
+- OpenAI GPT-4o as strong second option
+- Ollama llava:34b as local fallback
+
+## Testing the System
+
+### Check Provider Availability
+
+```typescript
+import { checkAvailableProviders } from './services/multiProviderChatService';
+
+const providers = await checkAvailableProviders();
+console.log(providers);
+// { ollama: true, gemini: true, openai: false }
+```
+
+### Get Detailed Provider Status
+
+```typescript
+import { getProviderStatus } from './services/multiProviderChatService';
+
+const status = await getProviderStatus();
+console.log(status);
+/*
+{
+  primary: { name: 'Ollama (Kimi K2)', available: true, model: 'kimi-k2:1t-cloud' },
+  secondary: { name: 'Ollama (Qwen Coder)', available: true, model: 'qwen-coder:480b-cloud' },
+  tertiary: { name: 'Google Gemini', available: true, model: 'gemini-2.0-flash-exp' },
+  quaternary: { name: 'OpenAI GPT-4o', available: false, model: 'gpt-4o' }
+}
+*/
 ```
 
 ## Best Practices
 
-1. **Configure Multiple Providers** - Don't rely on just one
-2. **Monitor Logs** - Watch for frequent fallbacks (might indicate API issues)
-3. **Set Appropriate Word Limits** - Shorter responses = faster + cheaper
-4. **Use Feature-Specific Priority** - System automatically optimizes (e.g., Gemini for search)
-5. **Test Regularly** - Ensure all API keys are valid
+### 1. Configure Multiple Providers
+
+For maximum reliability, configure **at least 2-3 providers**:
+
+```bash
+OLLAMA_API_KEY=...
+GEMINI_API_KEY=...
+# OpenAI optional but recommended for critical applications
+OPENAI_API_KEY=...
+```
+
+### 2. Use Feature-Optimized Functions
+
+- For web search → Use `performSearch()` (prioritizes Gemini)
+- For vision tasks → Use `analyzeImage()` (prioritizes Gemini/GPT-4o)
+- For general chat → Use `Chat` class (prioritizes Ollama)
+
+### 3. Monitor Console Logs
+
+Enable console logging in development to see which providers are being used:
+
+```typescript
+// Console will show:
+// 🔄 Trying Ollama with kimi-k2:1t-cloud...
+// ✅ Success with Ollama (kimi-k2:1t-cloud)
+```
+
+### 4. Handle Errors Gracefully
+
+Always wrap AI calls in try-catch blocks:
+
+```typescript
+try {
+  const response = await chat.sendMessage(userInput);
+  displayResponse(response);
+} catch (error) {
+  console.error('AI service unavailable:', error);
+  showErrorToUser('服務暫時無法使用，請稍後再試');
+}
+```
+
+### 5. Optimize Temperature and Top-P
+
+Different tasks need different settings:
+
+```typescript
+// Creative content (sermons, prayers)
+{ temperature: 0.8, topP: 0.95 }
+
+// Factual analysis (biblical exegesis)
+{ temperature: 0.4, topP: 0.85 }
+
+// Structured output (JSON, outlines)
+{ temperature: 0.3, topP: 0.8 }
+```
 
 ## Troubleshooting
 
-### Issue: Always using fallback provider
+### Issue: All providers failing
 
-**Solution:** Check primary provider API key and quota
-
-### Issue: "All providers failed"
-
-**Solutions:**
-1. Verify at least one API key is valid
-2. Check API key quotas/billing
-3. Check network connectivity
-4. Review console logs for specific errors
+**Solution:**
+1. Check `.env.local` exists and contains API keys
+2. Verify API keys are valid and active
+3. Check internet connectivity
+4. Check API service status pages
 
 ### Issue: Slow responses
 
-**Solutions:**
+**Solution:**
+1. Primary providers may be slow/unavailable
+2. Check console logs to see which provider succeeded
+3. Consider setting shorter timeouts
+4. Use smaller models for faster responses
+
+### Issue: Inconsistent output quality
+
+**Solution:**
 1. Check which provider is being used (console logs)
-2. Consider using faster models
-3. Reduce `max_tokens` / `wordLimit`
+2. Different providers have different strengths
+3. Adjust temperature/topP for consistency
+4. Consider forcing a specific provider for critical tasks
 
-### Issue: No web search sources
+## Advanced: Direct Provider Access
 
-**Cause:** Only Gemini supports web search
-**Solution:** Ensure `GEMINI_API_KEY` is configured and Gemini is available
+If you need to bypass automatic fallback and use a specific provider:
 
----
+### Ollama Only
 
-## Summary
+```typescript
+import { Chat } from './services/ollamaChatService';
 
-The multi-provider system provides:
+const chat = new Chat('kimi-k2:1t-cloud', systemInstruction);
+const response = await chat.sendMessage('Hello');
+```
 
-✅ **Automatic failover** - No manual intervention needed
-✅ **Maximum reliability** - Multiple backup providers
-✅ **Cost optimization** - Uses cheapest provider first
-✅ **Feature optimization** - Right provider for each task
-✅ **Transparent logging** - Clear visibility into what's happening
+### Unified API with Provider Preference
 
-Your application will now work reliably even if individual providers have issues!
+```typescript
+import * as UnifiedAPI from './api/unified';
+
+const response = await UnifiedAPI.chat({
+  messages: [{ role: 'user', content: 'Hello' }],
+  model: 'kimi-k2:1t-cloud',  // Prefer this model
+  temperature: 0.7
+});
+```
+
+## Conclusion
+
+The multi-provider AI system provides:
+
+✅ **Reliability** - Automatic failover ensures uptime
+✅ **Cost Optimization** - Uses cheapest providers first
+✅ **Feature Optimization** - Routes to best provider per task
+✅ **Transparency** - Clear logging of provider usage
+✅ **Flexibility** - Easy to add new providers
+
+The system will continue working even if 3 out of 4 providers fail, ensuring maximum availability for your AI theology application.
