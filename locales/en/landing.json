@@ -1,0 +1,41 @@
+{
+  "mainTitle": "Christianity: Experiencing Living Belief",
+  "mainTitleChinese": "Christianity: Experiencing Living Belief",
+  "subtitle": "Six senses + AI, unlock spiritual experiences, explore Christian culture",
+  "footer": {
+    "choose": "Choose an experience to begin your Christianity Culture journey",
+    "chooseChinese": "Choose an experience to begin your Christianity Culture journey"
+  },
+  "categories": {
+    "eat": {
+      "title": "Eat: Agape Table and Communion",
+      "titleShort": "Eat",
+      "description": "Communion Agape Feast: Food preparation methods, experience the meaning of sharing"
+    },
+    "walk": {
+      "title": "Walk: Travel and Pilgrim Route",
+      "titleShort": "Walk",
+      "description": "Holy Land Routes: Pilgrimage paths, believers' faith journey"
+    },
+    "listen": {
+      "title": "Listen: Music and Worship Hymns",
+      "titleShort": "Listen",
+      "description": "Heavenly Sounds: Sacred music, hymn audio worship experience"
+    },
+    "see": {
+      "title": "See: Church Buildings with Aesthetic",
+      "titleShort": "See",
+      "description": "Visual Arts: Church architecture, experiencing God's glory"
+    },
+    "read": {
+      "title": "Read: Scripture to Feeling",
+      "titleShort": "Read",
+      "description": "Reading Imagination: Narrative literature leads to deeper receiving"
+    },
+    "meditate": {
+      "title": "Meditate: Peace in Spirituality",
+      "titleShort": "Meditate",
+      "description": "Enter Quietness: Spiritual exploration, spiritual practice"
+    }
+  }
+}

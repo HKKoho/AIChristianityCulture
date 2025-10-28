@@ -2,12 +2,28 @@ import React from 'react';
 import { Utensils, Footprints, Headphones, Eye, BookOpen, Heart } from 'lucide-react';
 import type { CultureCategory } from '../types';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 interface LandingPageProps {
   onNavigate: (destination: CultureCategory) => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
+  const { t } = useTranslation(['landing', 'common']);
+
+  // Mapping feature IDs to translation keys
+  const getFeatureKey = (id: string) => {
+    const mapping: Record<string, string> = {
+      'love-feast': 'eat',
+      'travel-pilgrim': 'walk',
+      'music-hymns': 'listen',
+      'church-aesthetics': 'see',
+      'bible-manuscripts': 'read',
+      'soul-spirituality': 'meditate'
+    };
+    return mapping[id] || id;
+  };
+
   const features = [
     {
       id: 'love-feast' as const,
@@ -85,13 +101,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
       <div className="text-center mb-12">
         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-rose-400 to-amber-400 bg-clip-text text-transparent">
-          基督教：經驗生活的信仰
+          {t('landing:mainTitleChinese')}
         </h1>
         <h2 className="text-3xl font-semibold mb-4 text-gray-800">
-          Christianity：Experiencing Living Belief
+          {t('landing:mainTitle')}
         </h2>
         <p className="text-xl text-gray-700">
-          六種感官+人工智能，開啟靈性體驗，探索基督教的文化
+          {t('landing:subtitle')}
         </p>
       </div>
  
@@ -121,13 +137,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
                 <div className="bg-black/20 rounded-lg p-4 backdrop-blur-sm">
                   <h2 className="text-2xl font-bold text-white mb-2 drop-shadow-md">
-                    {feature.title}
+                    {t(`landing:categories.${getFeatureKey(feature.id)}.title`)}
                   </h2>
                   <p className="text-sm text-white mb-4 font-medium drop-shadow-md">
+                    {/* Subtitle already in English, keep original */}
                     {feature.subtitle}
                   </p>
                   <p className="text-white leading-relaxed drop-shadow-sm">
-                    {feature.description}
+                    {t(`landing:categories.${getFeatureKey(feature.id)}.description`)}
                   </p>
                 </div>
               </div>
@@ -139,8 +156,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </div>
 
       <div className="mt-16 text-center text-gray-600 text-sm">
-        <p>選擇一種體驗方式，開始您的基督教文化探索之旅</p>
-        <p className="mt-2">Choose an experience to begin your Christianity Culture journey</p>
+        <p>{t('landing:footer.chooseChinese')}</p>
+        <p className="mt-2">{t('landing:footer.choose')}</p>
       </div>
       </div>
     </div>

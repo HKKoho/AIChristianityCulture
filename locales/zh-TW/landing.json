@@ -1,0 +1,41 @@
+{
+  "mainTitle": "基督教：經驗生活的信仰",
+  "mainTitleChinese": "基督教：經驗生活的信仰",
+  "subtitle": "六種感官+人工智能，開啟靈性體驗，探索基督教的文化",
+  "footer": {
+    "choose": "選擇一種體驗方式，開始您的基督教文化探索之旅",
+    "chooseChinese": "選擇一種體驗方式，開始您的基督教文化探索之旅"
+  },
+  "categories": {
+    "eat": {
+      "title": "吃： 愛筵與主餐",
+      "titleShort": "吃",
+      "description": "聖餐愛筵：食物製作方法，體驗共享意義"
+    },
+    "walk": {
+      "title": "行：旅遊與朝聖",
+      "titleShort": "走",
+      "description": "聖地路線：朝聖之路，信徒信仰歷程"
+    },
+    "listen": {
+      "title": "聽：音樂與聖樂",
+      "titleShort": "聽",
+      "description": "聆聽天籟：聖樂、聖詩音頻的崇拜體驗"
+    },
+    "see": {
+      "title": "看: 教堂與美學",
+      "titleShort": "看",
+      "description": "視覺藝術：教堂建築、觸覺神的榮耀"
+    },
+    "read": {
+      "title": "讀: 聖經與感受",
+      "titleShort": "讀",
+      "description": "閱讀想象：敘事文學帶動更深領受"
+    },
+    "meditate": {
+      "title": "思：平靜與靈修",
+      "titleShort": "想",
+      "description": "進入安靜：靈裏探索、靈性操練"
+    }
+  }
+}

@@ -9,6 +9,7 @@ import enListen from '../locales/en/listen.json';
 import enSee from '../locales/en/see.json';
 import enRead from '../locales/en/read.json';
 import enMeditate from '../locales/en/meditate.json';
+import enLanding from '../locales/en/landing.json';
 
 import zhCommon from '../locales/zh-TW/common.json';
 import zhEat from '../locales/zh-TW/eat.json';
@@ -17,6 +18,7 @@ import zhListen from '../locales/zh-TW/listen.json';
 import zhSee from '../locales/zh-TW/see.json';
 import zhRead from '../locales/zh-TW/read.json';
 import zhMeditate from '../locales/zh-TW/meditate.json';
+import zhLanding from '../locales/zh-TW/landing.json';
 
 const resources = {
   en: {
@@ -27,6 +29,7 @@ const resources = {
     see: enSee,
     read: enRead,
     meditate: enMeditate,
+    landing: enLanding,
   },
   'zh-TW': {
     common: zhCommon,
@@ -36,6 +39,7 @@ const resources = {
     see: zhSee,
     read: zhRead,
     meditate: zhMeditate,
+    landing: zhLanding,
   },
 };
 
