@@ -5,12 +5,15 @@ import { AISearch } from './AISearch';
 import { CulturalExplorer } from './CulturalExplorer';
 import { ModelContextProtocol } from './ModelContextProtocol';
 import { Slideshow } from './Slideshow';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface ListenProps {
   onBack: () => void;
 }
 
 export const Listen: React.FC<ListenProps> = ({ onBack }) => {
+  const { t } = useTranslation(['listen', 'common']);
   const [selectedAudio, setSelectedAudio] = useState<AudioContent | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -90,11 +93,11 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'hymn': return '聖詩';
-      case 'chant': return '聖歌';
-      case 'sermon': return '講道';
-      case 'prayer': return '禱告';
-      case 'meditation': return '默想';
+      case 'hymn': return t('listen:hymn');
+      case 'chant': return t('listen:chant');
+      case 'sermon': return t('listen:sermon');
+      case 'prayer': return t('listen:prayer');
+      case 'meditation': return t('listen:meditation');
       default: return type;
     }
   };
@@ -114,13 +117,16 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
     return (
       <>
       <div className="w-full max-w-4xl mx-auto p-6">
-        <button
-          onClick={() => { setSelectedAudio(null); setIsPlaying(false); }}
-          className="flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回音樂列表
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => { setSelectedAudio(null); setIsPlaying(false); }}
+            className="flex items-center gap-2 text-purple-600 hover:text-purple-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToList')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-purple-500 to-purple-700 p-8 text-white">
@@ -140,7 +146,7 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
             {/* Audio Player Placeholder */}
             <div className="bg-purple-50 rounded-lg p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-gray-600">時長: {selectedAudio.duration}</span>
+                <span className="text-sm text-gray-600">{t('common:duration')}: {selectedAudio.duration}</span>
                 <button
                   onClick={() => setIsPlaying(!isPlaying)}
                   className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
@@ -148,12 +154,12 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
                   {isPlaying ? (
                     <>
                       <Pause className="w-5 h-5" />
-                      <span>暫停</span>
+                      <span>{t('listen:pause')}</span>
                     </>
                   ) : (
                     <>
                       <Play className="w-5 h-5" />
-                      <span>播放</span>
+                      <span>{t('listen:play')}</span>
                     </>
                   )}
                 </button>
@@ -161,11 +167,11 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
               <div className="w-full bg-purple-200 rounded-full h-2">
                 <div className="bg-purple-600 h-2 rounded-full" style={{ width: isPlaying ? '30%' : '0%' }}></div>
               </div>
-              <p className="text-sm text-gray-500 mt-2 italic">音頻文件待添加</p>
+              <p className="text-sm text-gray-500 mt-2 italic">{t('listen:audioFilePending')}</p>
             </div>
 
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">背景與意義</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('listen:backgroundAndMeaning')}</h2>
               <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
                 <p className="text-gray-700 leading-relaxed">{selectedAudio.background}</p>
               </div>
@@ -173,7 +179,7 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
 
             {selectedAudio.transcript && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">歌詞/文本</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('listen:lyricsText')}</h2>
                 <div className="bg-gray-50 p-4 rounded font-mono text-sm whitespace-pre-line">
                   {selectedAudio.transcript}
                 </div>
@@ -192,13 +198,16 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
   return (
     <>
       <div className="w-full max-w-6xl mx-auto p-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回首頁
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-purple-600 hover:text-purple-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToHome')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         {/* Slideshow Section */}
         <div className="mb-8">
@@ -209,12 +218,12 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Headphones className="w-12 h-12 text-purple-600" />
             <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-500 to-purple-700 bg-clip-text text-transparent">
-              聽
+              {t('listen:title')}
             </h1>
           </div>
-          <h2 className="text-3xl font-semibold mb-4 text-gray-800">Listen</h2>
+          <h2 className="text-3xl font-semibold mb-4 text-gray-800">{t('common:categories.listen')}</h2>
           <p className="text-xl text-gray-600">
-            聆聽天籟：聖樂、聖詩、禱告詞與默想音頻
+            {t('listen:subtitle')}
           </p>
         </div>
 
