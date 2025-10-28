@@ -5,12 +5,15 @@ import { AISearch } from './AISearch';
 import { CulturalExplorer } from './CulturalExplorer';
 import { ModelContextProtocol } from './ModelContextProtocol';
 import { Slideshow } from './Slideshow';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface MeditateProps {
   onBack: () => void;
 }
 
 export const Meditate: React.FC<MeditateProps> = ({ onBack }) => {
+  const { t } = useTranslation(['meditate', 'common']);
   const [selectedMeditation, setSelectedMeditation] = useState<MeditationGuide | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -174,10 +177,10 @@ export const Meditate: React.FC<MeditateProps> = ({ onBack }) => {
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'lectio-divina': return '聖言誦禱';
-      case 'contemplative': return '默觀祈禱';
-      case 'ignatian': return '依納爵式';
-      case 'centering-prayer': return '中心祈禱';
+      case 'lectio-divina': return t('meditate:lectioDivina');
+      case 'contemplative': return t('meditate:contemplative');
+      case 'ignatian': return t('meditate:ignatian');
+      case 'centering-prayer': return t('meditate:centeringPrayer');
       default: return type;
     }
   };
@@ -196,13 +199,16 @@ export const Meditate: React.FC<MeditateProps> = ({ onBack }) => {
     return (
       <>
       <div className="w-full max-w-4xl mx-auto p-6">
-        <button
-          onClick={() => { setSelectedMeditation(null); setCurrentStep(0); }}
-          className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回默想列表
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => { setSelectedMeditation(null); setCurrentStep(0); }}
+            className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToList')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-indigo-500 to-indigo-700 p-8 text-white">
@@ -226,12 +232,12 @@ export const Meditate: React.FC<MeditateProps> = ({ onBack }) => {
             <p className="text-lg text-gray-700 mb-6">{selectedMeditation.description}</p>
 
             <div className="mb-6 bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded">
-              <p className="text-sm font-semibold text-indigo-800 mb-1">聖經基礎</p>
+              <p className="text-sm font-semibold text-indigo-800 mb-1">{t('meditate:scriptureBase')}</p>
               <p className="text-gray-700 italic">{selectedMeditation.scriptureBase}</p>
             </div>
 
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">默想步驟</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('meditate:steps')}</h2>
               <div className="space-y-4">
                 {selectedMeditation.steps.map((step, index) => (
                   <div
@@ -266,7 +272,7 @@ export const Meditate: React.FC<MeditateProps> = ({ onBack }) => {
                             disabled={currentStep === selectedMeditation.steps.length - 1}
                           >
                             <Play className="w-4 h-4" />
-                            {currentStep === selectedMeditation.steps.length - 1 ? '已完成' : '下一步'}
+                            {currentStep === selectedMeditation.steps.length - 1 ? t('meditate:completed') : t('meditate:nextStep')}
                           </button>
                         )}
                       </div>
@@ -279,13 +285,13 @@ export const Meditate: React.FC<MeditateProps> = ({ onBack }) => {
                   onClick={() => setCurrentStep(0)}
                   className="mt-4 px-4 py-2 text-indigo-600 hover:text-indigo-700 transition-colors text-sm"
                 >
-                  重新開始
+                  {t('meditate:restart')}
                 </button>
               )}
             </div>
 
             <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">指引</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('meditate:guidance')}</h2>
               <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded">
                 <p className="text-gray-700 leading-relaxed">{selectedMeditation.guidance}</p>
               </div>
@@ -303,13 +309,16 @@ export const Meditate: React.FC<MeditateProps> = ({ onBack }) => {
   return (
     <>
       <div className="w-full max-w-6xl mx-auto p-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回首頁
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToHome')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         {/* Slideshow Section */}
         <div className="mb-8">
@@ -320,12 +329,12 @@ export const Meditate: React.FC<MeditateProps> = ({ onBack }) => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Heart className="w-12 h-12 text-indigo-600" />
             <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-500 to-indigo-700 bg-clip-text text-transparent">
-              想
+              {t('meditate:title')}
             </h1>
           </div>
-          <h2 className="text-3xl font-semibold mb-4 text-gray-800">Meditate</h2>
+          <h2 className="text-3xl font-semibold mb-4 text-gray-800">{t('common:categories.meditate')}</h2>
           <p className="text-xl text-gray-600">
-            進入安靜：靈魂探索、默觀祈禱與靈性操練
+            {t('meditate:subtitle')}
           </p>
         </div>
 
