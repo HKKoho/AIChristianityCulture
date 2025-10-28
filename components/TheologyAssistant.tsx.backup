@@ -1,0 +1,1001 @@
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  ArrowLeft, MessageCircle, Settings, FileText, Upload,
+  Send, Trash2, Save, Edit3, CheckCircle, AlertCircle,
+  Book, GraduationCap, Users, Search, Filter
+} from 'lucide-react';
+import {
+  TheologyAssistantMode,
+  AssignmentStage,
+  AcademicLevel,
+  TheologyAssistantState,
+  ChatMessage,
+  UploadedDocument,
+  AssignmentPlan,
+  AssignmentDraft,
+  AssignmentCritique,
+  LocalLLMModel
+} from '../types';
+
+interface TheologyAssistantProps {
+  onBack: () => void;
+}
+
+// Available local LLM models
+const LOCAL_LLM_MODELS: LocalLLMModel[] = [
+  {
+    id: 'llama4:scout',
+    name: 'Llama 4 Scout',
+    size: '67 GB',
+    description: '最新版本的Llama模型，適合複雜的神學討論和分析'
+  },
+  {
+    id: 'llama3.3:latest',
+    name: 'Llama 3.3',
+    size: '42 GB',
+    description: '高性能的通用語言模型，平衡效率與質量'
+  },
+  {
+    id: 'deepseek-coder:33b-instruct',
+    name: 'DeepSeek Coder 33B',
+    size: '18 GB',
+    description: '專精於邏輯推理和結構化思考，適合神學論證'
+  },
+  {
+    id: 'deepseek-r1:32b',
+    name: 'DeepSeek R1 32B',
+    size: '19 GB',
+    description: '推理能力強的模型，適合深度神學分析'
+  },
+  {
+    id: 'mistral-small:24b',
+    name: 'Mistral Small 24B',
+    size: '14 GB',
+    description: '輕量高效的模型，快速回應神學問題'
+  },
+  {
+    id: 'qwq:latest',
+    name: 'QwQ',
+    size: '19 GB',
+    description: '問答特化模型，適合聖經問答和教義解釋'
+  },
+  {
+    id: 'qwen2.5v1:32b',
+    name: 'Qwen 2.5v1 32B',
+    size: '32 GB',
+    description: '中英雙語優化模型，適合繁體中文神學討論'
+  },
+  {
+    id: 'gemma3:27b',
+    name: 'Gemma 3 27B',
+    size: '17 GB',
+    description: 'Google開發的高效模型，適合教育和學習場景'
+  },
+  {
+    id: 'llava:34b',
+    name: 'LLaVA 34B',
+    size: '20 GB',
+    description: '多模態模型，支援圖像和文字的神學資料分析',
+    hasVision: true
+  },
+  {
+    id: 'llama3.2-vision:latest',
+    name: 'Llama 3.2 Vision',
+    size: '7.9 GB',
+    description: '視覺語言模型，可分析聖經插圖和神學圖表',
+    hasVision: true
+  },
+  {
+    id: 'llama3.2:latest',
+    name: 'Llama 3.2',
+    size: '2.0 GB',
+    description: '輕量版本，適合快速對話和基礎問答'
+  }
+];
+
+const INITIAL_STATE: TheologyAssistantState = {
+  mode: TheologyAssistantMode.THEOLOGY_CHAT,
+  messages: [],
+  documents: [],
+  assignmentTopic: '',
+  theologyArea: '',
+  academicLevel: AcademicLevel.UNDERGRADUATE,
+  assignmentLength: 1500,
+  assignmentTone: 'academic',
+  assignmentStage: AssignmentStage.INPUT,
+  revisionNumber: 0,
+  maxRevisions: 3,
+  selectedModel: 'llama3.3:latest', // Default model
+  temperature: 0.7,
+  topP: 0.9,
+  isProcessing: false,
+};
+
+// Search Results Interface (kept from original TheologySearch)
+interface SearchResult {
+  title: string;
+  author: string;
+  type: 'book' | 'article' | 'commentary' | 'encyclopedia' | 'thesis';
+  description: string;
+  url?: string;
+  tags: string[];
+}
+
+const mockResults: SearchResult[] = [
+  {
+    title: '系統神學導論 (Introduction to Systematic Theology)',
+    author: '路易斯·柏克富 (Louis Berkhof)',
+    type: 'book',
+    description: '經典的改革宗系統神學著作，全面探討基督教教義的各個方面，包括神論、人論、基督論、救恩論等核心主題。',
+    url: 'https://example.com',
+    tags: ['系統神學', '改革宗', '教義'],
+  },
+  {
+    title: '聖經註釋：羅馬書 (Romans Commentary)',
+    author: '約翰·加爾文 (John Calvin)',
+    type: 'commentary',
+    description: '加爾文對羅馬書的深入註釋，闡述保羅的神學思想，特別關注因信稱義和神的主權等核心議題。',
+    url: 'https://example.com',
+    tags: ['聖經註釋', '羅馬書', '因信稱義'],
+  },
+  {
+    title: '教會歷史研究：宗教改革時期 (Reformation History)',
+    author: '多位作者',
+    type: 'article',
+    description: '探討16世紀宗教改革運動的歷史背景、神學爭議和對現代教會的影響。',
+    tags: ['教會歷史', '宗教改革', '馬丁路德'],
+  },
+  {
+    title: '三一神論的聖經基礎 (Biblical Basis for Trinity)',
+    author: '奧古斯丁 (Augustine)',
+    type: 'thesis',
+    description: '從聖經角度深入探討三位一體教義的神學基礎和歷史發展。',
+    url: 'https://example.com',
+    tags: ['三一神論', '教義', '教父神學'],
+  },
+];
+
+export const TheologyAssistant: React.FC<TheologyAssistantProps> = ({ onBack }) => {
+  const [state, setState] = useState<TheologyAssistantState>(INITIAL_STATE);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [state.messages]);
+
+  const updateState = (updates: Partial<TheologyAssistantState>) => {
+    setState(prev => ({ ...prev, ...updates }));
+  };
+
+  // Chat functionality
+  const handleSendMessage = async () => {
+    if (!currentMessage.trim() || state.isProcessing) return;
+
+    const userMessage: ChatMessage = {
+      role: 'user',
+      content: currentMessage,
+      timestamp: new Date().toISOString(),
+    };
+
+    updateState({
+      messages: [...state.messages, userMessage],
+      isProcessing: true,
+    });
+
+    setCurrentMessage('');
+
+    // Simulate AI response
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const selectedModel = LOCAL_LLM_MODELS.find(m => m.id === state.selectedModel);
+      const aiMessage: ChatMessage = {
+        role: 'assistant',
+        content: `【${selectedModel?.name || '未知模型'}】回應您關於「${currentMessage}」的神學問題：\n\n根據聖經教導和神學傳統，我來為您分析這個主題。在當前的${state.mode}模式下，並採用 Temperature: ${state.temperature}, Top-P: ${state.topP} 的參數設定。\n\n請注意：這是一個模擬回應，實際實現中會整合真實的本地 LLM 服務 (${state.selectedModel})。`,
+        timestamp: new Date().toISOString(),
+      };
+
+      updateState({
+        messages: [...state.messages, userMessage, aiMessage],
+        isProcessing: false,
+      });
+    } catch (error) {
+      updateState({ isProcessing: false });
+    }
+  };
+
+  // Document upload functionality
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        const document: UploadedDocument = {
+          name: file.name,
+          content,
+          type: file.name.split('.').pop() as any || 'txt',
+        };
+
+        updateState({
+          documents: [...state.documents, document],
+        });
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  // Assignment Assistant functionality
+  const createAssignmentPlan = async () => {
+    if (!state.assignmentTopic.trim() || !state.theologyArea.trim()) return;
+
+    updateState({
+      isProcessing: true,
+      assignmentStage: AssignmentStage.PLANNING
+    });
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const plan: AssignmentPlan = {
+        id: Date.now().toString(),
+        topic: state.assignmentTopic,
+        content: `# 神學作業計劃：${state.assignmentTopic}
+
+## 研究領域
+${state.theologyArea}
+
+## 學術水平
+${state.academicLevel}
+
+## 作業長度
+約 ${state.assignmentLength} 字
+
+## 研究大綱
+1. 引言和背景
+2. 聖經基礎分析
+3. 神學傳統觀點
+4. 當代應用
+5. 結論和反思
+
+## 參考資源
+- 聖經經文研究
+- 教父著作
+- 現代神學評論
+- 學術期刊文章
+
+這個計劃將指導您完成一份全面的神學作業。`,
+        createdAt: new Date().toISOString(),
+      };
+
+      updateState({
+        currentPlan: plan,
+        isProcessing: false,
+        assignmentStage: AssignmentStage.DRAFTING,
+      });
+    } catch (error) {
+      updateState({ isProcessing: false });
+    }
+  };
+
+  const createAssignmentDraft = async () => {
+    if (!state.currentPlan) return;
+
+    updateState({
+      isProcessing: true,
+      assignmentStage: AssignmentStage.CRITIQUING
+    });
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      const draft: AssignmentDraft = {
+        id: Date.now().toString(),
+        topic: state.assignmentTopic,
+        content: `# ${state.assignmentTopic}
+
+## 引言
+
+${state.assignmentTopic}是當代神學研究中的重要議題。本文將從聖經、教會歷史和系統神學的角度來探討這個主題。
+
+## 聖經基礎
+
+根據聖經教導，我們可以看到相關的原則和指導...
+
+## 神學分析
+
+從${state.theologyArea}的角度來看，這個議題涉及到多個重要的神學概念...
+
+## 當代應用
+
+在現代教會和基督徒生活中，這些原則如何應用...
+
+## 結論
+
+通過深入研究，我們可以得出...
+
+*注意：這是一個示例草稿，實際實現中會生成更詳細和準確的內容。*`,
+        stage: AssignmentStage.DRAFTING,
+        revisionNumber: state.revisionNumber,
+        createdAt: new Date().toISOString(),
+      };
+
+      updateState({
+        currentDraft: draft,
+        isProcessing: false,
+      });
+    } catch (error) {
+      updateState({ isProcessing: false });
+    }
+  };
+
+  // Search functionality
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    let filtered = mockResults.filter(result =>
+      result.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      result.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      result.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    if (selectedType !== 'all') {
+      filtered = filtered.filter(result => result.type === selectedType);
+    }
+
+    setSearchResults(filtered);
+    setIsSearching(false);
+  };
+
+  const getTypeIcon = (type: string) => {
+    const icons = {
+      book: '📚',
+      article: '📄',
+      commentary: '📖',
+      encyclopedia: '📕',
+      thesis: '🎓',
+    };
+    return icons[type as keyof typeof icons] || '📝';
+  };
+
+  const getTypeName = (type: string) => {
+    const names = {
+      book: '書籍',
+      article: '文章',
+      commentary: '註釋',
+      encyclopedia: '百科',
+      thesis: '論文',
+    };
+    return names[type as keyof typeof names] || type;
+  };
+
+  const renderTabButton = (mode: TheologyAssistantMode, icon: React.ReactNode, label: string) => (
+    <button
+      onClick={() => updateState({ mode })}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+        state.mode === mode
+          ? 'bg-indigo-600 text-white'
+          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+      }`}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+
+  const renderTheologyChat = () => {
+    const selectedModelInfo = LOCAL_LLM_MODELS.find(m => m.id === state.selectedModel);
+
+    return (
+      <div className="space-y-4">
+        <div className="bg-gray-800 rounded-lg p-4">
+          <h3 className="text-lg font-semibold mb-4">模型與參數設定</h3>
+
+          {/* Model Selection */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              選擇 AI 模型
+            </label>
+            <select
+              value={state.selectedModel}
+              onChange={(e) => updateState({ selectedModel: e.target.value })}
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+            >
+              {LOCAL_LLM_MODELS.map((model) => (
+                <option key={model.id} value={model.id}>
+                  {model.name} ({model.size})
+                  {model.hasVision ? ' 🎨' : ''}
+                </option>
+              ))}
+            </select>
+            {selectedModelInfo && (
+              <div className="mt-2 p-3 bg-gray-700/50 rounded-lg">
+                <p className="text-xs text-gray-300">{selectedModelInfo.description}</p>
+                {selectedModelInfo.hasVision && (
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="text-xs text-yellow-400">🎨 支援圖像分析</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                創造性程度: {state.temperature}
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={state.temperature}
+                onChange={(e) => updateState({ temperature: parseFloat(e.target.value) })}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <span>保守</span>
+                <span>創新</span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                回答多樣性: {state.topP}
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={state.topP}
+                onChange={(e) => updateState({ topP: parseFloat(e.target.value) })}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <span>聚焦</span>
+                <span>多元</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-800 rounded-lg min-h-96">
+          {state.messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                  message.role === 'user'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-700 text-gray-100'
+                }`}
+              >
+                {message.content}
+              </div>
+            </div>
+          ))}
+          {state.isProcessing && (
+            <div className="flex justify-start">
+              <div className="bg-gray-700 text-gray-100 px-4 py-2 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-400"></div>
+                  思考中...
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="p-4 border-t border-gray-700">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={currentMessage}
+              onChange={(e) => setCurrentMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder="輸入您的神學問題..."
+              className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+              disabled={state.isProcessing}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={state.isProcessing || !currentMessage.trim()}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
+            >
+              <Send className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    );
+  };
+
+  const renderReadingQA = () => (
+    <div className="space-y-6">
+      <div className="bg-gray-800 rounded-lg p-6">
+        <h3 className="text-lg font-semibold mb-4">文檔上傳</h3>
+        <div
+          className="border-2 border-dashed border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-gray-500 transition-colors"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <p className="text-gray-300">點擊上傳神學文檔</p>
+          <p className="text-sm text-gray-500 mt-2">支持 PDF, DOCX, TXT, MD 格式</p>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept=".pdf,.docx,.txt,.md"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
+
+        {state.documents.length > 0 && (
+          <div className="mt-4">
+            <h4 className="font-medium text-gray-300 mb-2">已上傳的文檔：</h4>
+            <div className="space-y-2">
+              {state.documents.map((doc, index) => (
+                <div key={index} className="flex items-center gap-2 p-2 bg-gray-700 rounded">
+                  <FileText className="w-4 h-4" />
+                  <span className="text-sm">{doc.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {state.documents.length > 0 && (
+        <div className="flex flex-col h-full">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-800 rounded-lg min-h-96">
+            {state.messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                    message.role === 'user'
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-700 text-gray-100'
+                  }`}
+                >
+                  {message.content}
+                </div>
+              </div>
+            ))}
+            {state.isProcessing && (
+              <div className="flex justify-start">
+                <div className="bg-gray-700 text-gray-100 px-4 py-2 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-400"></div>
+                    分析文檔中...
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="p-4 border-t border-gray-700">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={currentMessage}
+                onChange={(e) => setCurrentMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="詢問關於已上傳文檔的問題..."
+                className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+                disabled={state.isProcessing}
+              />
+              <button
+                onClick={handleSendMessage}
+                disabled={state.isProcessing || !currentMessage.trim()}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderAssignmentAssistant = () => (
+    <div className="space-y-6">
+      {state.assignmentStage === AssignmentStage.INPUT && (
+        <div className="bg-gray-800 rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">作業設定</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                作業主題
+              </label>
+              <input
+                type="text"
+                value={state.assignmentTopic}
+                onChange={(e) => updateState({ assignmentTopic: e.target.value })}
+                placeholder="例：三一神論的聖經基礎"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                神學領域
+              </label>
+              <input
+                type="text"
+                value={state.theologyArea}
+                onChange={(e) => updateState({ theologyArea: e.target.value })}
+                placeholder="例：系統神學"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                學術水平
+              </label>
+              <select
+                value={state.academicLevel}
+                onChange={(e) => updateState({ academicLevel: e.target.value as AcademicLevel })}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+              >
+                <option value={AcademicLevel.UNDERGRADUATE}>學士</option>
+                <option value={AcademicLevel.GRADUATE}>碩士</option>
+                <option value={AcademicLevel.DOCTORAL}>博士</option>
+                <option value={AcademicLevel.GENERAL}>一般</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                作業長度 (字數)
+              </label>
+              <input
+                type="number"
+                value={state.assignmentLength}
+                onChange={(e) => updateState({ assignmentLength: parseInt(e.target.value) })}
+                min="500"
+                max="10000"
+                step="500"
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-indigo-500 text-white"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={createAssignmentPlan}
+            disabled={!state.assignmentTopic.trim() || !state.theologyArea.trim() || state.isProcessing}
+            className="mt-4 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors flex items-center gap-2"
+          >
+            {state.isProcessing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                生成計劃中...
+              </>
+            ) : (
+              <>
+                <Edit3 className="w-4 h-4" />
+                創建作業計劃
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {state.currentPlan && state.assignmentStage === AssignmentStage.DRAFTING && (
+        <div className="bg-gray-800 rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">作業計劃</h3>
+            <CheckCircle className="w-5 h-5 text-green-400" />
+          </div>
+          <div className="bg-gray-700 rounded-lg p-4 mb-4">
+            <pre className="whitespace-pre-wrap text-sm text-gray-200">
+              {state.currentPlan.content}
+            </pre>
+          </div>
+          <button
+            onClick={createAssignmentDraft}
+            disabled={state.isProcessing}
+            className="px-6 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors flex items-center gap-2"
+          >
+            {state.isProcessing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                生成草稿中...
+              </>
+            ) : (
+              <>
+                <FileText className="w-4 h-4" />
+                創建作業草稿
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {state.currentDraft && state.assignmentStage === AssignmentStage.CRITIQUING && (
+        <div className="bg-gray-800 rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">作業草稿</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-400">修訂次數: {state.revisionNumber}</span>
+              <CheckCircle className="w-5 h-5 text-green-400" />
+            </div>
+          </div>
+          <div className="bg-gray-700 rounded-lg p-4 max-h-96 overflow-y-auto">
+            <pre className="whitespace-pre-wrap text-sm text-gray-200">
+              {state.currentDraft.content}
+            </pre>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => updateState({
+                assignmentStage: AssignmentStage.INPUT,
+                currentPlan: undefined,
+                currentDraft: undefined,
+                revisionNumber: 0
+              })}
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg font-medium transition-colors"
+            >
+              重新開始
+            </button>
+            <button
+              onClick={() => {
+                // Save draft functionality would go here
+                alert('草稿已保存！');
+              }}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              保存草稿
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderResourceSearch = () => (
+    <div className="space-y-6">
+      <div className="bg-gray-800 rounded-lg p-6">
+        <div className="flex gap-4 mb-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              placeholder="搜尋神學主題、作者或關鍵字..."
+              className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:border-green-500 text-white"
+            />
+          </div>
+          <button
+            onClick={handleSearch}
+            disabled={isSearching || !searchQuery.trim()}
+            className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors flex items-center gap-2"
+          >
+            {isSearching ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                搜尋中...
+              </>
+            ) : (
+              <>
+                <Search className="w-5 h-5" />
+                搜尋
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Filter className="w-5 h-5 text-gray-400" />
+          <span className="text-gray-400 text-sm">類型篩選:</span>
+          <div className="flex gap-2 flex-wrap">
+            {['all', 'book', 'article', 'commentary', 'encyclopedia', 'thesis'].map((type) => (
+              <button
+                key={type}
+                onClick={() => setSelectedType(type)}
+                className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                  selectedType === type
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                {type === 'all' ? '全部' : getTypeName(type)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {searchResults.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-200">
+            找到 {searchResults.length} 個結果
+          </h2>
+
+          {searchResults.map((result, index) => (
+            <div
+              key={index}
+              className="bg-gray-800 rounded-lg p-6 hover:bg-gray-750 transition-colors border border-gray-700 hover:border-green-500"
+            >
+              <div className="flex items-start gap-4">
+                <div className="text-4xl">{getTypeIcon(result.type)}</div>
+                <div className="flex-1">
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-1">
+                        {result.title}
+                      </h3>
+                      <p className="text-gray-400 text-sm">
+                        作者: {result.author}
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 bg-green-600/20 text-green-400 rounded-full text-xs font-medium whitespace-nowrap">
+                      {getTypeName(result.type)}
+                    </span>
+                  </div>
+
+                  <p className="text-gray-300 mb-4 leading-relaxed">
+                    {result.description}
+                  </p>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2 flex-wrap">
+                      {result.tags.map((tag, tagIndex) => (
+                        <span
+                          key={tagIndex}
+                          className="px-2 py-1 bg-gray-700 text-gray-300 rounded text-xs"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    {result.url && (
+                      <a
+                        href={result.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
+                      >
+                        <Book className="w-4 h-4" />
+                        查看資源
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {searchResults.length === 0 && searchQuery && !isSearching && (
+        <div className="text-center py-16">
+          <div className="text-6xl mb-4">🔍</div>
+          <h3 className="text-xl font-semibold text-gray-300 mb-2">
+            未找到相關資源
+          </h3>
+          <p className="text-gray-400">
+            嘗試使用不同的關鍵字或調整篩選條件
+          </p>
+        </div>
+      )}
+
+      {searchResults.length === 0 && !searchQuery && (
+        <div className="text-center py-16">
+          <div className="text-6xl mb-4">📚</div>
+          <h3 className="text-xl font-semibold text-gray-300 mb-2">
+            開始搜尋神學資源
+          </h3>
+          <p className="text-gray-400 mb-6">
+            輸入關鍵字搜尋書籍、文章、註釋和學術論文
+          </p>
+          <div className="flex justify-center gap-4 text-sm text-gray-500">
+            <span>熱門搜尋:</span>
+            {['三一神論', '因信稱義', '教會歷史', '系統神學'].map((term) => (
+              <button
+                key={term}
+                onClick={() => {
+                  setSearchQuery(term);
+                  setTimeout(handleSearch, 100);
+                }}
+                className="text-green-400 hover:text-green-300 transition-colors"
+              >
+                {term}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (state.mode) {
+      case TheologyAssistantMode.THEOLOGY_CHAT:
+        return renderTheologyChat();
+      case TheologyAssistantMode.READING_QA:
+        return renderReadingQA();
+      case TheologyAssistantMode.ASSIGNMENT_ASSISTANT:
+        return renderAssignmentAssistant();
+      case TheologyAssistantMode.RESOURCE_SEARCH:
+        return renderResourceSearch();
+      default:
+        return renderTheologyChat();
+    }
+  };
+
+  return (
+    <div className="w-full max-w-7xl mx-auto h-full flex flex-col">
+      {/* Header */}
+      <div className="mb-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors mb-4"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          返回主頁
+        </button>
+
+        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+          神學研究助手
+        </h1>
+        <p className="text-gray-400">探索信仰、聖經和神學理解的全方位平台</p>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        {renderTabButton(
+          TheologyAssistantMode.THEOLOGY_CHAT,
+          <MessageCircle className="w-4 h-4" />,
+          '神學對話'
+        )}
+        {renderTabButton(
+          TheologyAssistantMode.READING_QA,
+          <FileText className="w-4 h-4" />,
+          '上傳文檔簡閱或問答'
+        )}
+        {renderTabButton(
+          TheologyAssistantMode.ASSIGNMENT_ASSISTANT,
+          <GraduationCap className="w-4 h-4" />,
+          '作業助手'
+        )}
+        {renderTabButton(
+          TheologyAssistantMode.RESOURCE_SEARCH,
+          <Search className="w-4 h-4" />,
+          '資源搜尋'
+        )}
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 min-h-0">
+        {renderContent()}
+      </div>
+    </div>
+  );
+};
