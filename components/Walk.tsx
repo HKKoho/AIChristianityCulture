@@ -5,12 +5,15 @@ import { AISearch } from './AISearch';
 import { CulturalExplorer } from './CulturalExplorer';
 import { ModelContextProtocol } from './ModelContextProtocol';
 import { Slideshow } from './Slideshow';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface WalkProps {
   onBack: () => void;
 }
 
 export const Walk: React.FC<WalkProps> = ({ onBack }) => {
+  const { t } = useTranslation(['walk', 'common']);
   const [selectedRoute, setSelectedRoute] = useState<WalkRoute | null>(null);
 
   // Images for the Walk category slideshow
@@ -139,9 +142,9 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
 
   const getDifficultyText = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return '簡易';
-      case 'moderate': return '中等';
-      case 'challenging': return '挑戰';
+      case 'easy': return t('walk:easy');
+      case 'moderate': return t('walk:moderate');
+      case 'challenging': return t('walk:challenging');
       default: return difficulty;
     }
   };
@@ -150,13 +153,16 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
     return (
       <>
       <div className="w-full max-w-4xl mx-auto p-6">
-        <button
-          onClick={() => setSelectedRoute(null)}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回路線列表
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => setSelectedRoute(null)}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToList')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-blue-500 to-blue-700 p-8 text-white">
@@ -174,7 +180,7 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="flex items-center gap-2 text-blue-700 mb-1">
                   <MapPin className="w-5 h-5" />
-                  <span className="font-semibold">地點</span>
+                  <span className="font-semibold">{t('common:location')}</span>
                 </div>
                 <p className="text-gray-700">{selectedRoute.location}</p>
               </div>
@@ -182,7 +188,7 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="flex items-center gap-2 text-blue-700 mb-1">
                   <Clock className="w-5 h-5" />
-                  <span className="font-semibold">時長</span>
+                  <span className="font-semibold">{t('common:duration')}</span>
                 </div>
                 <p className="text-gray-700">{selectedRoute.duration}</p>
               </div>
@@ -190,7 +196,7 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
               <div className="bg-blue-50 p-4 rounded-lg">
                 <div className="flex items-center gap-2 text-blue-700 mb-1">
                   <TrendingUp className="w-5 h-5" />
-                  <span className="font-semibold">難度</span>
+                  <span className="font-semibold">{t('common:difficulty')}</span>
                 </div>
                 <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getDifficultyColor(selectedRoute.difficulty)}`}>
                   {getDifficultyText(selectedRoute.difficulty)}
@@ -199,14 +205,14 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
             </div>
 
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">聖經意義</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('walk:biblicalSignificance')}</h2>
               <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
                 <p className="text-gray-700 leading-relaxed">{selectedRoute.biblicalSignificance}</p>
               </div>
             </div>
 
             <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">路線點位</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('walk:waypoints')}</h2>
               <div className="space-y-4">
                 {selectedRoute.waypoints.map((waypoint, index) => (
                   <div key={index} className="flex gap-4">
@@ -236,13 +242,16 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
   return (
     <>
       <div className="w-full max-w-6xl mx-auto p-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回首頁
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToHome')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         {/* Slideshow Section */}
         <div className="mb-8">
@@ -253,12 +262,12 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Footprints className="w-12 h-12 text-blue-600" />
             <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent">
-              走
+              {t('walk:title')}
             </h1>
           </div>
-          <h2 className="text-3xl font-semibold mb-4 text-gray-800">Walk</h2>
+          <h2 className="text-3xl font-semibold mb-4 text-gray-800">{t('common:categories.walk')}</h2>
           <p className="text-xl text-gray-600">
-            與主同行的屬靈旅程
+            {t('walk:subtitle')}
           </p>
         </div>
 
