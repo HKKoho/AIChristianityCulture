@@ -5,12 +5,15 @@ import { AISearch } from './AISearch';
 import { CulturalExplorer } from './CulturalExplorer';
 import { ModelContextProtocol } from './ModelContextProtocol';
 import { Slideshow } from './Slideshow';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface ReadContentProps {
   onBack: () => void;
 }
 
 export const ReadContent: React.FC<ReadContentProps> = ({ onBack }) => {
+  const { t } = useTranslation(['read', 'common']);
   const [selectedReading, setSelectedReading] = useState<ReadingContent | null>(null);
 
   // Images for the Read category slideshow
@@ -91,11 +94,11 @@ export const ReadContent: React.FC<ReadContentProps> = ({ onBack }) => {
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'scripture': return '聖經';
-      case 'liturgy': return '禮儀';
-      case 'theology': return '神學';
-      case 'devotional': return '靈修';
-      case 'historical': return '歷史';
+      case 'scripture': return t('read:scripture');
+      case 'liturgy': return t('read:liturgy');
+      case 'theology': return t('read:theology');
+      case 'devotional': return t('read:devotional');
+      case 'historical': return t('read:historical');
       default: return type;
     }
   };
@@ -115,13 +118,16 @@ export const ReadContent: React.FC<ReadContentProps> = ({ onBack }) => {
     return (
       <>
       <div className="w-full max-w-4xl mx-auto p-6">
-        <button
-          onClick={() => setSelectedReading(null)}
-          className="flex items-center gap-2 text-rose-600 hover:text-rose-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回閱讀列表
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => setSelectedReading(null)}
+            className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToList')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-rose-500 to-rose-700 p-8 text-white">
@@ -145,19 +151,19 @@ export const ReadContent: React.FC<ReadContentProps> = ({ onBack }) => {
 
           <div className="p-8">
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">經文/節錄</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('read:excerpt')}</h2>
               <div className="bg-rose-50 border-l-4 border-rose-500 p-6 rounded">
                 <p className="text-gray-800 leading-relaxed text-lg italic">{selectedReading.excerpt}</p>
               </div>
             </div>
 
             <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">歷史背景</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('read:context')}</h2>
               <p className="text-gray-700 leading-relaxed">{selectedReading.context}</p>
             </div>
 
             <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">靈修默想</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('read:reflection')}</h2>
               <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded">
                 <p className="text-gray-700 leading-relaxed">{selectedReading.reflection}</p>
               </div>
@@ -175,13 +181,16 @@ export const ReadContent: React.FC<ReadContentProps> = ({ onBack }) => {
   return (
     <>
       <div className="w-full max-w-6xl mx-auto p-6">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-rose-600 hover:text-rose-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          返回首頁
-        </button>
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            {t('common:navigation.backToHome')}
+          </button>
+          <LanguageSwitcher />
+        </div>
 
         {/* Slideshow Section */}
         <div className="mb-8">
@@ -192,12 +201,12 @@ export const ReadContent: React.FC<ReadContentProps> = ({ onBack }) => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <BookOpen className="w-12 h-12 text-rose-600" />
             <h1 className="text-5xl font-bold bg-gradient-to-r from-rose-500 to-rose-700 bg-clip-text text-transparent">
-              讀
+              {t('read:title')}
             </h1>
           </div>
-          <h2 className="text-3xl font-semibold mb-4 text-gray-800">Read</h2>
+          <h2 className="text-3xl font-semibold mb-4 text-gray-800">{t('common:categories.read')}</h2>
           <p className="text-xl text-gray-600">
-            閱讀與默想：聖經抄本、手稿歷史與經文研究
+            {t('read:subtitle')}
           </p>
         </div>
 
