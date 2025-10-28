@@ -1,0 +1,24 @@
+{
+  "title": "吃",
+  "subtitle": "探索聖餐與愛筵的食物傳統",
+  "recipes": {
+    "unleavenedBread": {
+      "name": "無酵餅",
+      "nameEn": "Unleavened Bread",
+      "description": "傳統逾越節與聖餐使用的無酵餅，象徵著純潔與迅速的救贖。"
+    },
+    "communionGrapeJuice": {
+      "name": "聖餐葡萄汁",
+      "nameEn": "Communion Grape Juice",
+      "description": "代表基督寶血的葡萄汁，在聖餐中使用。"
+    },
+    "agapeFeast": {
+      "name": "愛筵餐點",
+      "nameEn": "Agape Feast Meal",
+      "description": "早期教會愛筵的傳統餐點，強調共融與分享。"
+    }
+  },
+  "ingredients": "材料",
+  "instructions": "製作步驟",
+  "biblicalContext": "聖經背景"
+}

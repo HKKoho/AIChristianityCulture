@@ -1,0 +1,19 @@
+{
+  "navigation": {
+    "backToHome": "Back to Home",
+    "backToList": "Back to List"
+  },
+  "categories": {
+    "eat": "Eat",
+    "walk": "Walk",
+    "listen": "Listen",
+    "see": "See",
+    "read": "Read",
+    "meditate": "Meditate"
+  },
+  "duration": "Duration",
+  "difficulty": "Difficulty",
+  "location": "Location",
+  "loading": "Loading...",
+  "error": "Error"
+}

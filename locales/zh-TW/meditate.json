@@ -1,0 +1,14 @@
+{
+  "title": "想",
+  "subtitle": "進入安靜：靈魂探索、默觀祈禱與靈性操練",
+  "guidance": "指引",
+  "nextStep": "下一步",
+  "completed": "已完成",
+  "restart": "重新開始",
+  "types": {
+    "lectio-divina": "聖言誦禱",
+    "contemplative": "默觀祈禱",
+    "ignatian": "依納爵式",
+    "centering-prayer": "中心祈禱"
+  }
+}

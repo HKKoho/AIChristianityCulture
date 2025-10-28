@@ -1,6 +1,7 @@
 import React from 'react';
 import { Utensils, Footprints, Headphones, Eye, BookOpen, Heart } from 'lucide-react';
 import type { CultureCategory } from '../types';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 interface LandingPageProps {
   onNavigate: (destination: CultureCategory) => void;
@@ -77,6 +78,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       />
 
       <div className="relative z-10">
+      {/* Language Switcher */}
+      <div className="flex justify-end mb-6 px-4">
+        <LanguageSwitcher />
+      </div>
+
       <div className="text-center mb-12">
         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-rose-400 to-amber-400 bg-clip-text text-transparent">
           基督教：經驗生活的信仰

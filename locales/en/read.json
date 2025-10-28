@@ -1,0 +1,15 @@
+{
+  "title": "Read",
+  "subtitle": "Reading and Meditation: Biblical Manuscripts, Manuscript History, and Scripture Study",
+  "excerpt": "Excerpt/Selection",
+  "context": "Context",
+  "reflection": "Reflection",
+  "author": "Author",
+  "types": {
+    "scripture": "Scripture",
+    "liturgy": "Liturgy",
+    "theology": "Theology",
+    "devotional": "Devotional",
+    "historical": "Historical"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "title": "See",
+  "subtitle": "Seeing God's Glory: Church Architecture, Icons, and Christian Visual Arts",
+  "period": "Period",
+  "biblicalReference": "Biblical Reference",
+  "interpretation": "Artistic Interpretation and Theological Significance",
+  "imagePlaceholder": "Image to be added",
+  "types": {
+    "painting": "Painting",
+    "icon": "Icon",
+    "sculpture": "Sculpture",
+    "architecture": "Architecture",
+    "manuscript": "Manuscript"
+  }
+}

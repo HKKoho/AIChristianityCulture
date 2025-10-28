@@ -1,0 +1,15 @@
+{
+  "title": "看",
+  "subtitle": "看見神的榮耀：教堂建築、聖像畫與基督教視覺藝術",
+  "period": "時期",
+  "biblicalReference": "聖經出處",
+  "interpretation": "藝術詮釋與神學意義",
+  "imagePlaceholder": "圖像待添加",
+  "types": {
+    "painting": "繪畫",
+    "icon": "聖像",
+    "sculpture": "雕塑",
+    "architecture": "建築",
+    "manuscript": "手抄本"
+  }
+}

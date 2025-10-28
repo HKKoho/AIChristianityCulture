@@ -1,0 +1,14 @@
+{
+  "title": "Meditate",
+  "subtitle": "Entering Stillness: Soul Exploration, Contemplative Prayer, and Spiritual Practices",
+  "guidance": "Guidance",
+  "nextStep": "Next Step",
+  "completed": "Completed",
+  "restart": "Restart",
+  "types": {
+    "lectio-divina": "Lectio Divina",
+    "contemplative": "Contemplative Prayer",
+    "ignatian": "Ignatian",
+    "centering-prayer": "Centering Prayer"
+  }
+}

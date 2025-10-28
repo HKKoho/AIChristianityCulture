@@ -1,0 +1,16 @@
+{
+  "title": "聽",
+  "subtitle": "聆聽天籟：聖樂、聖詩、禱告詞與默想音頻",
+  "play": "播放",
+  "pause": "暫停",
+  "audioPlaceholder": "音頻文件待添加",
+  "backgroundAndMeaning": "背景與意義",
+  "lyricsText": "歌詞/文本",
+  "types": {
+    "hymn": "聖詩",
+    "chant": "聖歌",
+    "sermon": "講道",
+    "prayer": "禱告",
+    "meditation": "默想"
+  }
+}

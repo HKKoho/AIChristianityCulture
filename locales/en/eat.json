@@ -1,0 +1,24 @@
+{
+  "title": "Eat",
+  "subtitle": "Exploring the Food Traditions of Communion and Agape Feast",
+  "recipes": {
+    "unleavenedBread": {
+      "name": "Unleavened Bread",
+      "nameEn": "Unleavened Bread",
+      "description": "Traditional unleavened bread used for Passover and Communion, symbolizing purity and swift redemption."
+    },
+    "communionGrapeJuice": {
+      "name": "Communion Grape Juice",
+      "nameEn": "Communion Grape Juice",
+      "description": "Grape juice representing Christ's blood, used in Communion."
+    },
+    "agapeFeast": {
+      "name": "Agape Feast Meal",
+      "nameEn": "Agape Feast Meal",
+      "description": "Traditional meal of the early church agape feast, emphasizing communion and sharing."
+    }
+  },
+  "ingredients": "Ingredients",
+  "instructions": "Instructions",
+  "biblicalContext": "Biblical Context"
+}

@@ -1,0 +1,19 @@
+{
+  "navigation": {
+    "backToHome": "返回首頁",
+    "backToList": "返回列表"
+  },
+  "categories": {
+    "eat": "吃",
+    "walk": "走",
+    "listen": "聽",
+    "see": "看",
+    "read": "讀",
+    "meditate": "想"
+  },
+  "duration": "時長",
+  "difficulty": "難度",
+  "location": "地點",
+  "loading": "載入中...",
+  "error": "錯誤"
+}

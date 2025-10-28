@@ -1,0 +1,26 @@
+{
+  "title": "走",
+  "subtitle": "與主同行的屬靈旅程",
+  "routes": {
+    "lastSupper": {
+      "name": "最後晚餐之路",
+      "nameEn": "The Way of the Last Supper",
+      "description": "跟隨耶穌從客西馬尼園到最後晚餐樓的路徑。"
+    },
+    "emmaus": {
+      "name": "以馬忤斯之路",
+      "nameEn": "Road to Emmaus",
+      "description": "重走復活的耶穌與兩位門徒同行的道路。"
+    },
+    "pilgrimage": {
+      "name": "聖地朝聖之路",
+      "nameEn": "Pilgrimage Path",
+      "description": "連結多個與聖餐相關的聖地的朝聖路線。"
+    }
+  },
+  "biblicalSignificance": "聖經意義",
+  "waypoints": "路線點位",
+  "easy": "簡易",
+  "moderate": "中等",
+  "challenging": "挑戰"
+}

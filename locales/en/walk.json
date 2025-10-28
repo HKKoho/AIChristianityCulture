@@ -1,0 +1,26 @@
+{
+  "title": "Walk",
+  "subtitle": "A Spiritual Journey Walking with the Lord",
+  "routes": {
+    "lastSupper": {
+      "name": "The Way of the Last Supper",
+      "nameEn": "The Way of the Last Supper",
+      "description": "Following Jesus' path from the Garden of Gethsemane to the Upper Room of the Last Supper."
+    },
+    "emmaus": {
+      "name": "Road to Emmaus",
+      "nameEn": "Road to Emmaus",
+      "description": "Retracing the road where the resurrected Jesus walked with two disciples."
+    },
+    "pilgrimage": {
+      "name": "Pilgrimage Path",
+      "nameEn": "Pilgrimage Path",
+      "description": "A pilgrimage route connecting multiple holy sites related to the Last Supper."
+    }
+  },
+  "biblicalSignificance": "Biblical Significance",
+  "waypoints": "Route Points",
+  "easy": "Easy",
+  "moderate": "Moderate",
+  "challenging": "Challenging"
+}

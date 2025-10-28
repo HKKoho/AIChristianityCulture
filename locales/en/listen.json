@@ -1,0 +1,16 @@
+{
+  "title": "Listen",
+  "subtitle": "Heavenly Sounds: Sacred Music, Hymns, Prayers, and Meditative Audio",
+  "play": "Play",
+  "pause": "Pause",
+  "audioPlaceholder": "Audio file to be added",
+  "backgroundAndMeaning": "Background and Meaning",
+  "lyricsText": "Lyrics/Text",
+  "types": {
+    "hymn": "Hymn",
+    "chant": "Chant",
+    "sermon": "Sermon",
+    "prayer": "Prayer",
+    "meditation": "Meditation"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "title": "讀",
+  "subtitle": "閱讀與默想：聖經抄本、手稿歷史與經文研究",
+  "excerpt": "經文/節錄",
+  "context": "背景",
+  "reflection": "反思",
+  "author": "作者",
+  "types": {
+    "scripture": "經文",
+    "liturgy": "禮儀",
+    "theology": "神學",
+    "devotional": "靈修",
+    "historical": "歷史"
+  }
+}
