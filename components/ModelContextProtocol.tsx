@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { ImageIcon, FileText, Upload, AlertTriangle, Volume2, StopCircle } from 'lucide-react';
 import { analyzeImage, analyzeText } from '../services/multiProviderChatService';
 
@@ -31,6 +31,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
   const [error, setError] = useState<string>('');
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const resultRef = useRef<HTMLDivElement | null>(null);
 
   const getCategoryContext = () => {
     switch (category) {
@@ -98,6 +99,13 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
   const handleExpand = useCallback(async () => {
     await handleAnalysis(true);
   }, [handleAnalysis]);
+
+  // Auto-scroll to results when they appear
+  useEffect(() => {
+    if (result && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [result]);
 
   const speakText = useCallback((text: string) => {
     if (!('speechSynthesis' in window)) {
@@ -246,7 +254,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
 
       {/* Results Area */}
       {(isLoading || error || result) && (
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto animate-fade-in">
+        <div ref={resultRef} className="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold text-gray-800">
               分析結果
@@ -280,7 +288,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
             </div>
           )}
           {result && (
-            <>
+            <div className="max-h-[70vh] overflow-y-auto pr-2">
               <div className="prose prose-lg max-w-none text-gray-700">
                 <div className="whitespace-pre-wrap">{result}</div>
               </div>
@@ -294,7 +302,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
                   </button>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
       )}

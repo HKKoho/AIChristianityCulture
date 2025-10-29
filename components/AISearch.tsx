@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, AlertTriangle, Loader, Mic, Volume2, StopCircle } from 'lucide-react';
 import { performSearch } from '../services/multiProviderChatService';
 
@@ -28,6 +28,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const recognitionRef = useRef<any>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const resultRef = useRef<HTMLDivElement | null>(null);
 
   const getCategoryInfo = () => {
     switch (category) {
@@ -161,6 +162,13 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
     }
   }, []);
 
+  // Auto-scroll to results when they appear
+  useEffect(() => {
+    if (result && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [result]);
+
   const speakText = useCallback((text: string) => {
     if (!('speechSynthesis' in window)) {
       setError('您的瀏覽器不支援語音播放功能');
@@ -246,7 +254,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
       </div>
 
       {(isLoading || error || result) && (
-        <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto animate-fade-in">
+        <div ref={resultRef} className="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto animate-fade-in">
           {isLoading && (
             <div className="flex flex-col items-center justify-center p-8">
               <Loader className="w-12 h-12 text-blue-600 animate-spin mb-4" />
@@ -260,7 +268,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
             </div>
           )}
           {result && (
-            <div>
+            <div className="max-h-[70vh] overflow-y-auto pr-2">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-2xl font-bold text-gray-800">
                   搜尋結果
