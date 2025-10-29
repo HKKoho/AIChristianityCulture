@@ -237,7 +237,6 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
               {t('see:title')}
             </h1>
           </div>
-          <h2 className="text-3xl font-semibold mb-4 text-gray-800">{t('common:categories.see')}</h2>
           <p className="text-xl text-gray-600">
             {t('see:subtitle')}
           </p>

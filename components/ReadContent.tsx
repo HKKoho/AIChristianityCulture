@@ -204,7 +204,6 @@ export const ReadContent: React.FC<ReadContentProps> = ({ onBack }) => {
               {t('read:title')}
             </h1>
           </div>
-          <h2 className="text-3xl font-semibold mb-4 text-gray-800">{t('common:categories.read')}</h2>
           <p className="text-xl text-gray-600">
             {t('read:subtitle')}
           </p>

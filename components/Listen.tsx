@@ -240,7 +240,6 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
               {t('listen:title')}
             </h1>
           </div>
-          <h2 className="text-3xl font-semibold mb-4 text-gray-800">{t('common:categories.listen')}</h2>
           <p className="text-xl text-gray-600">
             {t('listen:subtitle')}
           </p>
