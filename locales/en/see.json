@@ -4,12 +4,10 @@
   "period": "Period",
   "biblicalReference": "Biblical Reference",
   "interpretation": "Artistic Interpretation and Theological Significance",
-  "imagePlaceholder": "Image to be added",
-  "types": {
-    "painting": "Painting",
-    "icon": "Icon",
-    "sculpture": "Sculpture",
-    "architecture": "Architecture",
-    "manuscript": "Manuscript"
-  }
+  "imagePending": "Image to be added",
+  "painting": "Painting",
+  "icon": "Icon",
+  "sculpture": "Sculpture",
+  "architecture": "Architecture",
+  "manuscript": "Manuscript"
 }

@@ -5,11 +5,9 @@
   "context": "Context",
   "reflection": "Reflection",
   "author": "Author",
-  "types": {
-    "scripture": "Scripture",
-    "liturgy": "Liturgy",
-    "theology": "Theology",
-    "devotional": "Devotional",
-    "historical": "Historical"
-  }
+  "scripture": "Scripture",
+  "liturgy": "Liturgy",
+  "theology": "Theology",
+  "devotional": "Devotional",
+  "historical": "Historical"
 }

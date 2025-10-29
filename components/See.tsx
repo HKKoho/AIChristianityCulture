@@ -13,8 +13,9 @@ interface SeeProps {
 }
 
 export const See: React.FC<SeeProps> = ({ onBack }) => {
-  const { t } = useTranslation(['see', 'common']);
+  const { t, i18n } = useTranslation(['see', 'common']);
   const [selectedVisual, setSelectedVisual] = useState<VisualContent | null>(null);
+  const isEnglish = i18n.language === 'en';
 
   // Images for the See category slideshow
   const seeImages = [
@@ -33,58 +34,73 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
       title: '最後的晚餐',
       titleEn: 'The Last Supper',
       description: '達文西的經典作品，描繪耶穌與十二門徒共進最後晚餐的場景。',
+      descriptionEn: 'Leonardo da Vinci\'s classic masterpiece depicting Jesus and the twelve disciples sharing the Last Supper.',
       type: 'painting',
       imageUrl: '/images/last-supper.jpg',
       artist: '李奧納多·達文西 (Leonardo da Vinci)',
       period: '文藝復興時期 (1495-1498)',
+      periodEn: 'Renaissance Period (1495-1498)',
       biblicalReference: '馬太福音 26:20-29',
-      interpretation: '這幅壁畫描繪了耶穌宣布門徒中有人將出賣他的那一刻。達文西巧妙地捕捉了每位門徒的反應，展現了人性的複雜與戲劇性。畫面中央的耶穌形成穩定的三角形構圖，象徵神性的完美。這幅作品不僅是藝術傑作，也深刻表達了聖餐的神學意義。'
+      interpretation: '這幅壁畫描繪了耶穌宣布門徒中有人將出賣他的那一刻。達文西巧妙地捕捉了每位門徒的反應，展現了人性的複雜與戲劇性。畫面中央的耶穌形成穩定的三角形構圖，象徵神性的完美。這幅作品不僅是藝術傑作，也深刻表達了聖餐的神學意義。',
+      interpretationEn: 'This mural depicts the moment when Jesus announced that one of his disciples would betray him. Da Vinci skillfully captured each disciple\'s reaction, revealing the complexity and drama of human nature. Jesus at the center forms a stable triangular composition, symbolizing divine perfection. This work is not only an artistic masterpiece but also profoundly expresses the theological significance of Communion.'
     },
     {
       id: '2',
       title: '基督全能者聖像',
       titleEn: 'Christ Pantocrator',
       description: '東正教傳統中最重要的基督聖像，展現基督作為宇宙統治者的形象。',
+      descriptionEn: 'The most important Christ icon in Eastern Orthodox tradition, displaying Christ as the cosmic ruler.',
       type: 'icon',
       imageUrl: '/images/christ-pantocrator.jpg',
       artist: '拜占庭聖像畫師',
       period: '拜占庭時期 (6-15世紀)',
+      periodEn: 'Byzantine Period (6th-15th century)',
       biblicalReference: '啟示錄 1:8',
-      interpretation: '基督全能者（Pantocrator，意為「全能統治者」）是東正教最神聖的聖像之一。畫中基督右手舉起祝福手勢，左手持福音書。他的面容嚴肅而慈愛，象徵著神的公義與憐憫。聖像的金色背景代表天國的榮光，提醒信徒基督的神性與超越性。'
+      interpretation: '基督全能者（Pantocrator，意為「全能統治者」）是東正教最神聖的聖像之一。畫中基督右手舉起祝福手勢，左手持福音書。他的面容嚴肅而慈愛，象徵著神的公義與憐憫。聖像的金色背景代表天國的榮光，提醒信徒基督的神性與超越性。',
+      interpretationEn: 'Christ Pantocrator (meaning "Almighty Ruler") is one of the most sacred icons in Eastern Orthodoxy. Christ raises his right hand in blessing while holding the Gospel in his left. His countenance is both solemn and loving, symbolizing God\'s justice and mercy. The icon\'s golden background represents the glory of heaven, reminding believers of Christ\'s divinity and transcendence.'
     },
     {
       id: '3',
       title: '聖母子',
       titleEn: 'Madonna and Child',
       description: '拉斐爾的聖母子像，展現母愛與神聖的完美結合。',
+      descriptionEn: 'Raphael\'s Madonna and Child, showcasing the perfect union of maternal love and divine holiness.',
       type: 'painting',
       imageUrl: '/images/madonna-child.jpg',
       artist: '拉斐爾 (Raphael)',
       period: '文藝復興時期 (1505-1506)',
+      periodEn: 'Renaissance Period (1505-1506)',
       biblicalReference: '路加福音 2:6-7',
-      interpretation: '拉斐爾的聖母子像以其溫柔優雅著稱。聖母瑪利亞抱著嬰孩耶穌，展現人性與神性的交融。畫面構圖和諧，色彩柔和，體現了文藝復興時期對美與信仰結合的追求。這類作品幫助信徒默想道成肉身的奧秘。'
+      interpretation: '拉斐爾的聖母子像以其溫柔優雅著稱。聖母瑪利亞抱著嬰孩耶穌，展現人性與神性的交融。畫面構圖和諧，色彩柔和，體現了文藝復興時期對美與信仰結合的追求。這類作品幫助信徒默想道成肉身的奧秘。',
+      interpretationEn: 'Raphael\'s Madonna and Child is renowned for its gentle elegance. The Virgin Mary holds the infant Jesus, displaying the fusion of humanity and divinity. The composition is harmonious, colors are soft, embodying the Renaissance pursuit of beauty united with faith. Such works help believers meditate on the mystery of the Incarnation.'
     },
     {
       id: '4',
       title: '哥德式大教堂',
       titleEn: 'Gothic Cathedral',
       description: '中世紀哥德式建築的代表，以高聳尖塔和彩色玻璃窗聞名。',
+      descriptionEn: 'Representative of medieval Gothic architecture, renowned for soaring spires and stained glass windows.',
       type: 'architecture',
       imageUrl: '/images/gothic-cathedral.jpg',
       period: '哥德時期 (12-16世紀)',
+      periodEn: 'Gothic Period (12th-16th century)',
       biblicalReference: '詩篇 27:4',
-      interpretation: '哥德式大教堂是中世紀基督教建築的巔峰之作。高聳的尖頂象徵人對天國的渴望，彩色玻璃窗講述聖經故事，飛扶壁支撐起巨大的空間。當陽光透過彩窗灑入，整個教堂充滿神聖光輝，幫助信徒體驗神的榮耀與同在。'
+      interpretation: '哥德式大教堂是中世紀基督教建築的巔峰之作。高聳的尖頂象徵人對天國的渴望，彩色玻璃窗講述聖經故事，飛扶壁支撐起巨大的空間。當陽光透過彩窗灑入，整個教堂充滿神聖光輝，幫助信徒體驗神的榮耀與同在。',
+      interpretationEn: 'Gothic cathedrals are the pinnacle of medieval Christian architecture. Soaring spires symbolize humanity\'s longing for heaven, stained glass windows narrate Biblical stories, and flying buttresses support vast spaces. When sunlight streams through the colored windows, the entire cathedral is filled with sacred radiance, helping believers experience God\'s glory and presence.'
     },
     {
       id: '5',
       title: '受難像',
       titleEn: 'The Crucifixion',
       description: '基督被釘十字架的雕塑作品，表達救贖的核心主題。',
+      descriptionEn: 'Sculptural works of Christ crucified, expressing the central theme of redemption.',
       type: 'sculpture',
       imageUrl: '/images/crucifixion.jpg',
       period: '中世紀至現代',
+      periodEn: 'Medieval to Modern',
       biblicalReference: '約翰福音 19:17-30',
-      interpretation: '受難像是基督教藝術中最重要的主題之一。十字架上的基督形象提醒信徒神對人類的愛與犧牲。不同時期的藝術家以不同方式詮釋這一主題：中世紀強調痛苦與犧牲，文藝復興注重人性尊嚴，現代則探索更抽象的神學意義。'
+      interpretation: '受難像是基督教藝術中最重要的主題之一。十字架上的基督形象提醒信徒神對人類的愛與犧牲。不同時期的藝術家以不同方式詮釋這一主題：中世紀強調痛苦與犧牲，文藝復興注重人性尊嚴，現代則探索更抽象的神學意義。',
+      interpretationEn: 'The Crucifixion is one of the most important themes in Christian art. The image of Christ on the cross reminds believers of God\'s love and sacrifice for humanity. Artists from different periods have interpreted this theme differently: the medieval period emphasized suffering and sacrifice, the Renaissance focused on human dignity, and modern art explores more abstract theological meanings.'
     },
     {
       id: '6',

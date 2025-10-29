@@ -5,10 +5,10 @@
   "nextStep": "Next Step",
   "completed": "Completed",
   "restart": "Restart",
-  "types": {
-    "lectio-divina": "Lectio Divina",
-    "contemplative": "Contemplative Prayer",
-    "ignatian": "Ignatian",
-    "centering-prayer": "Centering Prayer"
-  }
+  "scriptureBase": "Scripture Base",
+  "steps": "Steps",
+  "lectioDivina": "Lectio Divina",
+  "contemplative": "Contemplative Prayer",
+  "ignatian": "Ignatian",
+  "centeringPrayer": "Centering Prayer"
 }
