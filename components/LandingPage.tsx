@@ -101,11 +101,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
       <div className="text-center mb-12">
         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-rose-400 to-amber-400 bg-clip-text text-transparent">
-          {t('landing:mainTitleChinese')}
-        </h1>
-        <h2 className="text-3xl font-semibold mb-4 text-gray-800">
           {t('landing:mainTitle')}
-        </h2>
+        </h1>
         <p className="text-xl text-gray-700">
           {t('landing:subtitle')}
         </p>
@@ -152,8 +149,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </div>
 
       <div className="mt-16 text-center text-gray-600 text-sm">
-        <p>{t('landing:footer.chooseChinese')}</p>
-        <p className="mt-2">{t('landing:footer.choose')}</p>
+        <p>{t('landing:footer.choose')}</p>
       </div>
       </div>
     </div>
