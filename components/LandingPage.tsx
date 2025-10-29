@@ -136,13 +136,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
 
                 <div className="bg-black/20 rounded-lg p-4 backdrop-blur-sm">
-                  <h2 className="text-2xl font-bold text-white mb-2 drop-shadow-md">
+                  <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-md">
                     {t(`landing:categories.${getFeatureKey(feature.id)}.title`)}
                   </h2>
-                  <p className="text-sm text-white mb-4 font-medium drop-shadow-md">
-                    {/* Subtitle already in English, keep original */}
-                    {feature.subtitle}
-                  </p>
                   <p className="text-white leading-relaxed drop-shadow-sm">
                     {t(`landing:categories.${getFeatureKey(feature.id)}.description`)}
                   </p>
