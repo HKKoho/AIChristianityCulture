@@ -10,7 +10,8 @@ export const LanguageSwitcher: React.FC = () => {
     i18n.changeLanguage(newLang);
   };
 
-  const currentLanguageLabel = i18n.language === 'zh-TW' ? '中文' : 'EN';
+  // Show the language you can switch TO (not the current language)
+  const nextLanguageLabel = i18n.language === 'zh-TW' ? 'EN' : '中文';
 
   return (
     <button
@@ -19,7 +20,7 @@ export const LanguageSwitcher: React.FC = () => {
       aria-label="Switch language"
     >
       <Globe className="w-4 h-4" />
-      <span className="font-medium">{currentLanguageLabel}</span>
+      <span className="font-medium">{nextLanguageLabel}</span>
     </button>
   );
 };
