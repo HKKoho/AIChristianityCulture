@@ -254,8 +254,9 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
             >
               <div className="bg-gradient-to-br from-purple-500 to-purple-700 p-6 text-white">
                 <Headphones className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
-                <h3 className="text-2xl font-bold mb-1">{audio.title}</h3>
-                <p className="text-purple-100">{audio.titleEn}</p>
+                <h3 className="text-2xl font-bold mb-1">
+                  {isEnglish ? audio.titleEn : audio.title}
+                </h3>
               </div>
               <div className="p-6">
                 <p className="text-gray-600 mb-4 line-clamp-2">

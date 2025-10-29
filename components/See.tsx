@@ -251,11 +251,14 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
             >
               <div className="bg-gradient-to-br from-green-500 to-green-700 p-6 text-white">
                 <Eye className="w-12 h-12 mb-3 group-hover:scale-110 transition-transform" />
-                <h3 className="text-2xl font-bold mb-1">{visual.title}</h3>
-                <p className="text-green-100">{visual.titleEn}</p>
+                <h3 className="text-2xl font-bold mb-1">
+                  {isEnglish ? visual.titleEn : visual.title}
+                </h3>
               </div>
               <div className="p-6">
-                <p className="text-gray-600 mb-4 line-clamp-2">{visual.description}</p>
+                <p className="text-gray-600 mb-4 line-clamp-2">
+                  {isEnglish && visual.descriptionEn ? visual.descriptionEn : visual.description}
+                </p>
                 <div className="flex items-center justify-between">
                   <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(visual.type)}`}>
                     {getTypeLabel(visual.type)}

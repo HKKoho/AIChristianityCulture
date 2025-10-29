@@ -26,7 +26,7 @@ export const Slideshow: React.FC<SlideshowProps> = ({
     }, interval);
 
     return () => clearInterval(timer);
-  }, [images.length, interval]);
+  }, [images, interval]);
 
   if (images.length === 0) {
     return null;
