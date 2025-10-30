@@ -147,9 +147,13 @@ export const Listen: React.FC<ListenProps> = ({ onBack }) => {
           <div className="bg-gradient-to-r from-purple-500 to-purple-700 p-8 text-white">
             <div className="flex items-center gap-3 mb-2">
               <Music className="w-8 h-8" />
-              <h1 className="text-4xl font-bold">{selectedAudio.title}</h1>
+              <h1 className="text-4xl font-bold">
+                {isEnglish ? selectedAudio.titleEn : selectedAudio.title}
+              </h1>
             </div>
-            <p className="text-xl opacity-90">{selectedAudio.titleEn}</p>
+            <p className="text-xl opacity-90">
+              {isEnglish ? selectedAudio.title : selectedAudio.titleEn}
+            </p>
             <span className={`inline-block mt-3 px-3 py-1 rounded-full text-sm font-semibold bg-white/20`}>
               {getTypeLabel(selectedAudio.type)}
             </span>

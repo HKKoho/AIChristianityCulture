@@ -107,12 +107,15 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
       title: '凱爾經書插圖',
       titleEn: 'Book of Kells Illumination',
       description: '中世紀愛爾蘭手抄本，以華麗的裝飾性插圖聞名。',
+      descriptionEn: 'Medieval Irish manuscript renowned for its ornate decorative illustrations.',
       type: 'manuscript',
       imageUrl: '/images/book-of-kells.jpg',
       artist: '凱爾修道院抄寫員',
       period: '中世紀早期 (約800年)',
+      periodEn: 'Early Medieval (c. 800 AD)',
       biblicalReference: '四福音書',
-      interpretation: '凱爾經書是中世紀手抄本藝術的傑作，包含四福音書的拉丁文本。每一頁都裝飾著精美的凱爾特紋樣、動物圖案和幾何設計。這些裝飾不僅美觀，更象徵著神話語的寶貴與永恆。修道士們以敬畏之心抄寫聖經，將每個字母都變成讚美神的藝術品。'
+      interpretation: '凱爾經書是中世紀手抄本藝術的傑作，包含四福音書的拉丁文本。每一頁都裝飾著精美的凱爾特紋樣、動物圖案和幾何設計。這些裝飾不僅美觀，更象徵著神話語的寶貴與永恆。修道士們以敬畏之心抄寫聖經，將每個字母都變成讚美神的藝術品。',
+      interpretationEn: 'The Book of Kells is a masterpiece of medieval manuscript art, containing the Latin text of the four Gospels. Each page is decorated with exquisite Celtic patterns, animal motifs, and geometric designs. These decorations are not only beautiful but also symbolize the preciousness and eternity of God\'s Word. Monks copied the Bible with reverence, transforming each letter into a work of art praising God.'
     }
   ];
 
@@ -157,9 +160,13 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
             <div className="bg-gradient-to-r from-green-500 to-green-700 p-8 text-white">
               <div className="flex items-center gap-3 mb-2">
                 <ImageIcon className="w-8 h-8" />
-                <h1 className="text-4xl font-bold">{selectedVisual.title}</h1>
+                <h1 className="text-4xl font-bold">
+                  {isEnglish ? selectedVisual.titleEn : selectedVisual.title}
+                </h1>
               </div>
-              <p className="text-xl opacity-90">{selectedVisual.titleEn}</p>
+              <p className="text-xl opacity-90">
+                {isEnglish ? selectedVisual.title : selectedVisual.titleEn}
+              </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="px-3 py-1 rounded-full text-sm font-semibold bg-white/20">
                   {getTypeLabel(selectedVisual.type)}
@@ -173,7 +180,9 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
             </div>
 
             <div className="p-8">
-              <p className="text-lg text-gray-700 mb-6">{selectedVisual.description}</p>
+              <p className="text-lg text-gray-700 mb-6">
+                {isEnglish && selectedVisual.descriptionEn ? selectedVisual.descriptionEn : selectedVisual.description}
+              </p>
 
               {/* Image Placeholder */}
               <div className="bg-gray-100 rounded-lg aspect-video flex items-center justify-center mb-6">
@@ -187,7 +196,9 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
               <div className="grid md:grid-cols-2 gap-6 mb-6">
                 <div className="bg-green-50 p-4 rounded-lg">
                   <h3 className="font-bold text-gray-800 mb-2">{t('see:period')}</h3>
-                  <p className="text-gray-700">{selectedVisual.period}</p>
+                  <p className="text-gray-700">
+                    {isEnglish && selectedVisual.periodEn ? selectedVisual.periodEn : selectedVisual.period}
+                  </p>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
                   <h3 className="font-bold text-gray-800 mb-2">{t('see:biblicalReference')}</h3>
@@ -198,7 +209,9 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('see:interpretation')}</h2>
                 <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
-                  <p className="text-gray-700 leading-relaxed">{selectedVisual.interpretation}</p>
+                  <p className="text-gray-700 leading-relaxed">
+                    {isEnglish && selectedVisual.interpretationEn ? selectedVisual.interpretationEn : selectedVisual.interpretation}
+                  </p>
                 </div>
               </div>
             </div>
@@ -263,7 +276,9 @@ export const See: React.FC<SeeProps> = ({ onBack }) => {
                   <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor(visual.type)}`}>
                     {getTypeLabel(visual.type)}
                   </span>
-                  <span className="text-sm text-gray-500">{visual.period.split('(')[0].trim()}</span>
+                  <span className="text-sm text-gray-500">
+                    {isEnglish && visual.periodEn ? visual.periodEn.split('(')[0].trim() : visual.period.split('(')[0].trim()}
+                  </span>
                 </div>
               </div>
             </button>

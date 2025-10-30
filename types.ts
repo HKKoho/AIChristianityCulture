@@ -35,11 +35,15 @@ export interface WalkRoute {
   name: string;
   nameEn: string;
   description: string;
+  descriptionEn?: string;
   location: string;
+  locationEn?: string;
   duration: string;
+  durationEn?: string;
   difficulty: 'easy' | 'moderate' | 'challenging';
   biblicalSignificance: string;
-  waypoints: { name: string; description: string }[];
+  biblicalSignificanceEn?: string;
+  waypoints: { name: string; nameEn?: string; description: string; descriptionEn?: string }[];
   mapUrl?: string;
 }
 
@@ -73,12 +77,17 @@ export interface ReadingContent {
   title: string;
   titleEn: string;
   author: string;
+  authorEn?: string;
   excerpt: string;
+  excerptEn?: string;
   fullText?: string;
   type: 'scripture' | 'liturgy' | 'theology' | 'devotional' | 'historical';
   period: string;
+  periodEn?: string;
   context: string;
+  contextEn?: string;
   reflection: string;
+  reflectionEn?: string;
 }
 
 export interface MeditationGuide {
@@ -86,11 +95,22 @@ export interface MeditationGuide {
   title: string;
   titleEn: string;
   description: string;
+  descriptionEn?: string;
   type: 'lectio-divina' | 'contemplative' | 'ignatian' | 'centering-prayer';
   duration: string;
-  steps: { title: string; instruction: string; duration: string }[];
+  durationEn?: string;
+  steps: {
+    title: string;
+    titleEn?: string;
+    instruction: string;
+    instructionEn?: string;
+    duration: string;
+    durationEn?: string;
+  }[];
   scriptureBase?: string;
+  scriptureBaseEn?: string;
   guidance: string;
+  guidanceEn?: string;
 }
 
 // Bible Game Types

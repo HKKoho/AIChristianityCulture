@@ -35,6 +35,7 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
       location: '耶路撒冷舊城',
       locationEn: 'Old City of Jerusalem',
       duration: '1.5 小時',
+      durationEn: '1.5 hours',
       difficulty: 'easy',
       biblicalSignificance: '馬可福音 14:12-26 記載了耶穌與門徒共進最後晚餐，設立聖餐的時刻。這條路線帶你體驗那個神聖夜晚的地理環境。',
       biblicalSignificanceEn: 'Mark 14:12-26 records Jesus sharing the Last Supper with his disciples and instituting Communion. This route lets you experience the geography of that sacred night.',
@@ -80,6 +81,7 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
       location: '耶路撒冷至以馬忤斯',
       locationEn: 'Jerusalem to Emmaus',
       duration: '3 小時',
+      durationEn: '3 hours',
       difficulty: 'moderate',
       biblicalSignificance: '路加福音 24:13-35 記載復活的耶穌與兩位門徒同行，在擘餅時顯現。這是聖餐與復活相連的重要故事。',
       biblicalSignificanceEn: 'Luke 24:13-35 records the risen Jesus walking with two disciples and revealing himself in the breaking of bread. This is an important story connecting Communion with the resurrection.',
@@ -125,6 +127,7 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
       location: '耶路撒冷至伯利恆',
       locationEn: 'Jerusalem to Bethlehem',
       duration: '全日',
+      durationEn: 'Full day',
       difficulty: 'challenging',
       biblicalSignificance: '這條路線連結了從耶穌誕生的伯利恆（生命糧）到設立聖餐的耶路撒冷，完整體驗救恩歷史。',
       biblicalSignificanceEn: 'This route connects Bethlehem, where Jesus was born (Bread of Life), to Jerusalem, where Communion was instituted, offering a complete experience of salvation history.',
@@ -238,7 +241,9 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
                   <Clock className="w-5 h-5" />
                   <span className="font-semibold">{t('common:duration')}</span>
                 </div>
-                <p className="text-gray-700">{selectedRoute.duration}</p>
+                <p className="text-gray-700">
+                  {isEnglish && selectedRoute.durationEn ? selectedRoute.durationEn : selectedRoute.duration}
+                </p>
               </div>
 
               <div className="bg-blue-50 p-4 rounded-lg">
@@ -343,7 +348,7 @@ export const Walk: React.FC<WalkProps> = ({ onBack }) => {
                 <div className="flex flex-wrap gap-2">
                   <span className="text-sm text-gray-500 flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    {route.duration}
+                    {isEnglish && route.durationEn ? route.durationEn : route.duration}
                   </span>
                   <span className={`text-xs px-2 py-1 rounded-full ${getDifficultyColor(route.difficulty)}`}>
                     {getDifficultyText(route.difficulty)}
