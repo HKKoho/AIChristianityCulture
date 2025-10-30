@@ -1,0 +1,30 @@
+{
+  "title": "AI 智能搜尋",
+  "description": "探索 {{category}} 相關的文化與歷史資訊",
+  "categories": {
+    "eat": {
+      "title": "食物與聖餐",
+      "placeholder": "例如：聖餐的歷史起源、無酵餅的意義..."
+    },
+    "walk": {
+      "title": "朝聖之路",
+      "placeholder": "例如：以馬忤斯之路的歷史、耶路撒冷朝聖..."
+    },
+    "listen": {
+      "title": "聖樂與讚美",
+      "placeholder": "例如：格列高利聖歌的起源、讚美詩的發展..."
+    },
+    "see": {
+      "title": "藝術與建築",
+      "placeholder": "例如：拜占庭聖像畫、哥德式建築特色..."
+    },
+    "read": {
+      "title": "聖經與文獻",
+      "placeholder": "例如：死海古卷的發現、早期教父著作..."
+    },
+    "meditate": {
+      "title": "靈修與默想",
+      "placeholder": "例如：Lectio Divina 的步驟、默觀禱告的歷史..."
+    }
+  }
+}

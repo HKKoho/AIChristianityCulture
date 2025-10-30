@@ -1,0 +1,30 @@
+{
+  "title": "AI Smart Search",
+  "description": "Explore cultural and historical information related to {{category}}",
+  "categories": {
+    "eat": {
+      "title": "Food & Communion",
+      "placeholder": "e.g., History of communion, significance of unleavened bread..."
+    },
+    "walk": {
+      "title": "Pilgrimage Routes",
+      "placeholder": "e.g., History of the Road to Emmaus, Jerusalem pilgrimage..."
+    },
+    "listen": {
+      "title": "Sacred Music",
+      "placeholder": "e.g., Origins of Gregorian chant, development of hymns..."
+    },
+    "see": {
+      "title": "Art & Architecture",
+      "placeholder": "e.g., Byzantine icons, Gothic architectural features..."
+    },
+    "read": {
+      "title": "Scripture & Manuscripts",
+      "placeholder": "e.g., Discovery of the Dead Sea Scrolls, early Church Fathers' writings..."
+    },
+    "meditate": {
+      "title": "Meditation & Spirituality",
+      "placeholder": "e.g., Steps of Lectio Divina, history of contemplative prayer..."
+    }
+  }
+}

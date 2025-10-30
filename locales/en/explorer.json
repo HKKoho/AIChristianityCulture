@@ -1,0 +1,34 @@
+{
+  "categories": {
+    "eat": {
+      "title": "Food Culture Explorer",
+      "greeting": "Hello! I'm the Cultural Explorer assistant. I can answer questions about Christian food traditions, communion, agape feasts, and more.",
+      "note": "Note: Responses are limited to 100 words. For more detailed explanations, please explicitly request \"more details\"."
+    },
+    "walk": {
+      "title": "Pilgrimage Explorer",
+      "greeting": "Hello! I'm the Cultural Explorer assistant. I can answer questions about Christian pilgrimage routes, holy sites, biblical locations, and more.",
+      "note": "Note: Responses are limited to 100 words. For more detailed explanations, please explicitly request \"more details\"."
+    },
+    "listen": {
+      "title": "Sacred Music Explorer",
+      "greeting": "Hello! I'm the Cultural Explorer assistant. I can answer questions about Christian music, hymns, chants, and more.",
+      "note": "Note: Responses are limited to 100 words. For more detailed explanations, please explicitly request \"more details\"."
+    },
+    "see": {
+      "title": "Visual Arts Explorer",
+      "greeting": "Hello! I'm the Cultural Explorer assistant. I can answer questions about Christian art, icons, architecture, and more.",
+      "note": "Note: Responses are limited to 100 words. For more detailed explanations, please explicitly request \"more details\"."
+    },
+    "read": {
+      "title": "Sacred Texts Explorer",
+      "greeting": "Hello! I'm the Cultural Explorer assistant. I can answer questions about biblical manuscripts, Church Fathers' writings, theological literature, and more.",
+      "note": "Note: Responses are limited to 100 words. For more detailed explanations, please explicitly request \"more details\"."
+    },
+    "meditate": {
+      "title": "Spiritual Practice Explorer",
+      "greeting": "Hello! I'm the Cultural Explorer assistant. I can answer questions about Christian meditation, contemplative prayer, spiritual exercises, and more.",
+      "note": "Note: Responses are limited to 100 words. For more detailed explanations, please explicitly request \"more details\"."
+    }
+  }
+}

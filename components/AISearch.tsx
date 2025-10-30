@@ -20,7 +20,7 @@ interface AISearchProps {
 }
 
 export const AISearch: React.FC<AISearchProps> = ({ category }) => {
-  const { t } = useTranslation(['common']);
+  const { t, i18n } = useTranslation(['common', 'aiSearch']);
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -210,11 +210,11 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
   return (
     <div className="w-full max-w-6xl mx-auto p-6 space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">AI 智能搜尋</h2>
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">{t('aiSearch:title')}</h2>
         <h3 className="text-xl text-gray-600 mb-2">
-          {categoryInfo.title} - {categoryInfo.titleEn}
+          {t(`aiSearch:categories.${category}.title`)}
         </h3>
-        <p className="text-gray-600">探索 {categoryInfo.title} 相關的文化與歷史資訊</p>
+        <p className="text-gray-600">{t('aiSearch:description', { category: t(`aiSearch:categories.${category}.title`) })}</p>
       </div>
 
       <div className="max-w-3xl mx-auto">
@@ -224,7 +224,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={categoryInfo.placeholder}
+            placeholder={t(`aiSearch:categories.${category}.placeholder`)}
             className="flex-1 bg-transparent p-3 text-gray-800 focus:outline-none w-full"
             disabled={isLoading || isListening}
           />

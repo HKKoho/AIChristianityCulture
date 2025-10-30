@@ -23,7 +23,7 @@ const fileToBase64 = async (file: File): Promise<{ data: string; mimeType: strin
 };
 
 export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ category }) => {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['common', 'mcp']);
   const [analysisType, setAnalysisType] = useState<AnalysisType>('image');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -149,9 +149,9 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
   return (
     <div className="w-full max-w-6xl mx-auto p-6 space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">模型上下文協議 (MCP)</h2>
-        <h3 className="text-xl text-gray-600 mb-2">Model Context Protocol</h3>
-        <p className="text-gray-600">分析圖片或文字以揭示深層的文化與歷史脈絡</p>
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">{t('mcp:title')}</h2>
+        <h3 className="text-xl text-gray-600 mb-2">{t('mcp:subtitle')}</h3>
+        <p className="text-gray-600">{t('mcp:description')}</p>
       </div>
 
       {/* Analysis Type Toggle */}

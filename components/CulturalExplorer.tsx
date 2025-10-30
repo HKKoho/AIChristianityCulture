@@ -14,7 +14,7 @@ interface CulturalExplorerProps {
 }
 
 export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, context }) => {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation(['common', 'explorer']);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -85,10 +85,10 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
     setMessages([
       {
         role: 'model',
-        content: config.greeting + '\n\n註：回應限制在 100 字以內。如需更詳細的說明，請明確要求「更多詳情」。'
+        content: t(`explorer:categories.${category}.greeting`) + '\n\n' + t(`explorer:categories.${category}.note`)
       }
     ]);
-  }, [config.greeting, wordLimit]);
+  }, [category, wordLimit, t]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isLoading || !chatRef.current) return;
@@ -233,8 +233,7 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold">{config.title}</h2>
-                <p className="text-sm opacity-90">{config.titleEn}</p>
+                <h2 className="text-xl font-bold">{t(`explorer:categories.${category}.title`)}</h2>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
