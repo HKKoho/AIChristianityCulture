@@ -10,6 +10,9 @@ import enSee from '../locales/en/see.json';
 import enRead from '../locales/en/read.json';
 import enMeditate from '../locales/en/meditate.json';
 import enLanding from '../locales/en/landing.json';
+import enAiSearch from '../locales/en/aiSearch.json';
+import enMcp from '../locales/en/mcp.json';
+import enExplorer from '../locales/en/explorer.json';
 
 import zhCommon from '../locales/zh-TW/common.json';
 import zhEat from '../locales/zh-TW/eat.json';
@@ -19,6 +22,9 @@ import zhSee from '../locales/zh-TW/see.json';
 import zhRead from '../locales/zh-TW/read.json';
 import zhMeditate from '../locales/zh-TW/meditate.json';
 import zhLanding from '../locales/zh-TW/landing.json';
+import zhAiSearch from '../locales/zh-TW/aiSearch.json';
+import zhMcp from '../locales/zh-TW/mcp.json';
+import zhExplorer from '../locales/zh-TW/explorer.json';
 
 const resources = {
   en: {
@@ -30,6 +36,9 @@ const resources = {
     read: enRead,
     meditate: enMeditate,
     landing: enLanding,
+    aiSearch: enAiSearch,
+    mcp: enMcp,
+    explorer: enExplorer,
   },
   'zh-TW': {
     common: zhCommon,
@@ -40,6 +49,9 @@ const resources = {
     read: zhRead,
     meditate: zhMeditate,
     landing: zhLanding,
+    aiSearch: zhAiSearch,
+    mcp: zhMcp,
+    explorer: zhExplorer,
   },
 };
 
