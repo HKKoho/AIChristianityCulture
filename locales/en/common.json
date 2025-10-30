@@ -15,5 +15,53 @@
   "difficulty": "Difficulty",
   "location": "Location",
   "loading": "Loading...",
-  "error": "Error"
+  "error": "Error",
+  "buttons": {
+    "search": "Search",
+    "upload": "Upload",
+    "clickToUpload": "Click to upload",
+    "startAnalysis": "Start Analysis",
+    "analyzing": "Analyzing...",
+    "expand": "Expand Details (500 words)",
+    "voiceInput": "Voice Input",
+    "stopRecording": "Stop Recording",
+    "readAloud": "Read Aloud",
+    "stopPlaying": "Stop Playing",
+    "send": "Send"
+  },
+  "messages": {
+    "searching": "Searching...",
+    "thinking": "Thinking...",
+    "pleaseEnterQuery": "Please enter a search query",
+    "searchFailed": "Search failed:",
+    "searchError": "An error occurred during the search. Please check API settings or try again later.",
+    "voiceNotSupported": "Your browser does not support speech recognition",
+    "voiceRecognitionFailed": "Voice recognition failed, please try again",
+    "speechNotSupported": "Your browser does not support text-to-speech",
+    "speechFailed": "Text-to-speech failed",
+    "technicalError": "Sorry, I encountered a technical issue. Please try again later.",
+    "pleaseProvideInput": "Please provide input for analysis",
+    "analysisFailed": "Analysis failed:",
+    "analysisError": "An error occurred during analysis. Please check API settings or try again later.",
+    "fileSizeLimit": "File size should not exceed 4MB",
+    "fileSelected": "Selected:",
+    "dragDropHint": "or drag and drop file here",
+    "fileFormats": "PNG, JPG, GIF max 4MB",
+    "wordLimit": "(limit 100 words)",
+    "wordLimit500": "(limit 500 words)"
+  },
+  "labels": {
+    "searchResult": "Search Results",
+    "analysisResult": "Analysis Results",
+    "sources": "Sources:",
+    "imageAnalysis": "Image Analysis",
+    "textAnalysis": "Text Analysis",
+    "uploadImage": "Upload Image",
+    "textToAnalyze": "Text to Analyze",
+    "culturalExplorer": "Cultural Explorer"
+  },
+  "placeholders": {
+    "askCulturalExplorer": "Ask the Cultural Explorer...",
+    "enterText": "Enter text, quotes, or descriptions..."
+  }
 }

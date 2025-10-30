@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, X, Send, User, Bot, Loader, Mic, Volume2, StopCircle } from 'lucide-react';
 import { createChatSession, sendChatMessage, Chat } from '../services/multiProviderChatService';
+import { useTranslation } from 'react-i18next';
 
 interface ChatMessage {
   role: 'user' | 'model';
@@ -13,6 +14,7 @@ interface CulturalExplorerProps {
 }
 
 export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, context }) => {
+  const { t } = useTranslation(['common']);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -115,12 +117,12 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
       console.error('Error sending message:', error);
       setMessages(prev => [
         ...prev,
-        { role: 'model', content: '抱歉，我遇到了技術問題。請稍後再試。' }
+        { role: 'model', content: t('common:messages.technicalError') }
       ]);
     } finally {
       setIsLoading(false);
     }
-  }, [input, isLoading]);
+  }, [input, isLoading, t]);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -131,7 +133,7 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
 
   const startListening = useCallback(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('您的瀏覽器不支援語音識別功能');
+      alert(t('common:messages.voiceNotSupported'));
       return;
     }
 
@@ -173,7 +175,7 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
 
   const speakMessage = useCallback((text: string, index: number) => {
     if (!('speechSynthesis' in window)) {
-      alert('您的瀏覽器不支援語音播放功能');
+      alert(t('common:messages.speechNotSupported'));
       return;
     }
 
@@ -211,10 +213,10 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
       <button
         onClick={() => setIsOpen(true)}
         className="fixed right-6 bottom-6 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-40 flex items-center gap-2"
-        aria-label="Open Cultural Explorer"
+        aria-label={t('common:labels.culturalExplorer')}
       >
         <MessageCircle className="w-6 h-6" />
-        <span className="hidden md:inline text-sm font-semibold">文化探索</span>
+        <span className="hidden md:inline text-sm font-semibold">{t('common:labels.culturalExplorer')}</span>
       </button>
 
       {/* Sidebar Chat Panel */}
@@ -274,7 +276,7 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
                             ? 'bg-red-500 hover:bg-red-600 text-white'
                             : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                         }`}
-                        title={speakingIndex === index ? '停止播放' : '朗讀訊息'}
+                        title={speakingIndex === index ? t('common:buttons.stopPlaying') : t('common:buttons.readAloud')}
                       >
                         {speakingIndex === index ? <StopCircle className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                       </button>
@@ -294,7 +296,7 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
                   </div>
                   <div className="max-w-[75%] p-3 rounded-lg bg-white text-gray-800 rounded-bl-none border border-gray-200 flex items-center gap-2">
                     <Loader className="w-4 h-4 animate-spin" />
-                    <span className="text-sm text-gray-500">思考中...</span>
+                    <span className="text-sm text-gray-500">{t('common:messages.thinking')}</span>
                   </div>
                 </div>
               )}
@@ -309,7 +311,7 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="詢問文化探索助手..."
+                  placeholder={t('common:placeholders.askCulturalExplorer')}
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={isLoading || isListening}
                 />
@@ -320,7 +322,7 @@ export const CulturalExplorer: React.FC<CulturalExplorerProps> = ({ category, co
                       ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
                       : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                   }`}
-                  title={isListening ? '停止錄音' : '語音輸入'}
+                  title={isListening ? t('common:buttons.stopRecording') : t('common:buttons.voiceInput')}
                 >
                   {isListening ? <StopCircle className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
                 </button>

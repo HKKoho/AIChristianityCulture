@@ -15,5 +15,53 @@
   "difficulty": "難度",
   "location": "地點",
   "loading": "載入中...",
-  "error": "錯誤"
+  "error": "錯誤",
+  "buttons": {
+    "search": "搜尋",
+    "upload": "上傳",
+    "clickToUpload": "點擊上傳",
+    "startAnalysis": "開始分析",
+    "analyzing": "分析中...",
+    "expand": "展開更多詳情 (500 字)",
+    "voiceInput": "語音輸入",
+    "stopRecording": "停止錄音",
+    "readAloud": "朗讀結果",
+    "stopPlaying": "停止播放",
+    "send": "發送"
+  },
+  "messages": {
+    "searching": "正在搜尋中...",
+    "thinking": "思考中...",
+    "pleaseEnterQuery": "請輸入搜尋問題",
+    "searchFailed": "搜尋失敗:",
+    "searchError": "搜尋過程中發生錯誤，請檢查 API 設定或稍後再試",
+    "voiceNotSupported": "您的瀏覽器不支援語音識別功能",
+    "voiceRecognitionFailed": "語音識別失敗，請重試",
+    "speechNotSupported": "您的瀏覽器不支援語音播放功能",
+    "speechFailed": "語音播放失敗",
+    "technicalError": "抱歉，我遇到了技術問題。請稍後再試。",
+    "pleaseProvideInput": "請提供分析的輸入內容",
+    "analysisFailed": "分析失敗:",
+    "analysisError": "分析過程中發生錯誤，請檢查 API 設定或稍後再試",
+    "fileSizeLimit": "圖片大小不應超過 4MB",
+    "fileSelected": "已選擇:",
+    "dragDropHint": "或拖放檔案至此",
+    "fileFormats": "PNG, JPG, GIF 最大 4MB",
+    "wordLimit": "(限 100 字)",
+    "wordLimit500": "(限 500 字)"
+  },
+  "labels": {
+    "searchResult": "搜尋結果",
+    "analysisResult": "分析結果",
+    "sources": "參考來源：",
+    "imageAnalysis": "圖片分析",
+    "textAnalysis": "文字分析",
+    "uploadImage": "上傳圖片",
+    "textToAnalyze": "輸入要分析的文字",
+    "culturalExplorer": "文化探索"
+  },
+  "placeholders": {
+    "askCulturalExplorer": "詢問文化探索助手...",
+    "enterText": "輸入文字、引文、或描述..."
+  }
 }

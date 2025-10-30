@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, AlertTriangle, Loader, Mic, Volume2, StopCircle } from 'lucide-react';
 import { performSearch } from '../services/multiProviderChatService';
+import { useTranslation } from 'react-i18next';
 
 interface SearchResult {
   text: string;
@@ -19,6 +20,7 @@ interface AISearchProps {
 }
 
 export const AISearch: React.FC<AISearchProps> = ({ category }) => {
+  const { t } = useTranslation(['common']);
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -88,7 +90,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
 
   const handleSearch = useCallback(async (expanded: boolean = false) => {
     if (!query.trim()) {
-      setError('請輸入搜尋問題');
+      setError(t('common:messages.pleaseEnterQuery'));
       return;
     }
     setIsLoading(true);
@@ -101,12 +103,12 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
       const searchResult = await performSearch(query, categoryInfo.context, wordLimit);
       setResult(searchResult);
     } catch (err) {
-      console.error('搜尋失敗:', err);
-      setError('搜尋過程中發生錯誤，請檢查 API 設定或稍後再試');
+      console.error(t('common:messages.searchFailed'), err);
+      setError(t('common:messages.searchError'));
     } finally {
       setIsLoading(false);
     }
-  }, [query, categoryInfo.context]);
+  }, [query, categoryInfo.context, t]);
 
   const handleExpand = useCallback(async () => {
     await handleSearch(true);
@@ -120,7 +122,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
 
   const startListening = useCallback(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      setError('您的瀏覽器不支援語音識別功能');
+      setError(t('common:messages.voiceNotSupported'));
       return;
     }
 
@@ -143,7 +145,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
-      setError('語音識別失敗，請重試');
+      setError(t('common:messages.voiceRecognitionFailed'));
       setIsListening(false);
     };
 
@@ -153,7 +155,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
 
     recognitionRef.current = recognition;
     recognition.start();
-  }, []);
+  }, [t]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
@@ -171,7 +173,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
 
   const speakText = useCallback((text: string) => {
     if (!('speechSynthesis' in window)) {
-      setError('您的瀏覽器不支援語音播放功能');
+      setError(t('common:messages.speechNotSupported'));
       return;
     }
 
@@ -193,12 +195,12 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
 
     utterance.onerror = () => {
       setIsSpeaking(false);
-      setError('語音播放失敗');
+      setError(t('common:messages.speechFailed'));
     };
 
     utteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
-  }, []);
+  }, [t]);
 
   const stopSpeaking = useCallback(() => {
     window.speechSynthesis.cancel();
@@ -233,8 +235,8 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
                 ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
                 : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
             }`}
-            aria-label={isListening ? '停止錄音' : '語音輸入'}
-            title={isListening ? '停止錄音' : '語音輸入'}
+            aria-label={isListening ? t('common:buttons.stopRecording') : t('common:buttons.voiceInput')}
+            title={isListening ? t('common:buttons.stopRecording') : t('common:buttons.voiceInput')}
           >
             {isListening ? <StopCircle className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
           </button>
@@ -242,7 +244,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
             onClick={() => handleSearch()}
             disabled={!query.trim() || isLoading || isListening}
             className="p-3 text-white bg-gradient-to-r from-blue-500 to-blue-700 rounded-md hover:from-blue-600 hover:to-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all"
-            aria-label="搜尋"
+            aria-label={t('common:buttons.search')}
           >
             {isLoading ? (
               <Loader className="w-6 h-6 animate-spin" />
@@ -258,7 +260,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
           {isLoading && (
             <div className="flex flex-col items-center justify-center p-8">
               <Loader className="w-12 h-12 text-blue-600 animate-spin mb-4" />
-              <p className="text-gray-600">正在搜尋中...</p>
+              <p className="text-gray-600">{t('common:messages.searching')}</p>
             </div>
           )}
           {error && (
@@ -271,9 +273,9 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
             <div className="max-h-[70vh] overflow-y-auto pr-2">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-2xl font-bold text-gray-800">
-                  搜尋結果
+                  {t('common:labels.searchResult')}
                   {!isExpanded && (
-                    <span className="text-sm font-normal text-gray-500 ml-2">(限 100 字)</span>
+                    <span className="text-sm font-normal text-gray-500 ml-2">{t('common:messages.wordLimit')}</span>
                   )}
                 </h3>
                 <button
@@ -283,7 +285,7 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
                       ? 'bg-red-500 hover:bg-red-600 text-white'
                       : 'bg-blue-500 hover:bg-blue-600 text-white'
                   }`}
-                  title={isSpeaking ? '停止播放' : '朗讀結果'}
+                  title={isSpeaking ? t('common:buttons.stopPlaying') : t('common:buttons.readAloud')}
                 >
                   {isSpeaking ? <StopCircle className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </button>
@@ -298,14 +300,14 @@ export const AISearch: React.FC<AISearchProps> = ({ category }) => {
                     onClick={handleExpand}
                     className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    展開更多詳情 (500 字)
+                    {t('common:buttons.expand')}
                   </button>
                 </div>
               )}
 
               {result.sources && result.sources.length > 0 && (
                 <div className="mt-6 pt-4 border-t border-gray-300">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-3">參考來源：</h4>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3">{t('common:labels.sources')}</h4>
                   <ul className="space-y-2">
                     {result.sources.map((source, index) => (
                       <li key={index} className="flex items-start gap-2">

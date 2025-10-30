@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { ImageIcon, FileText, Upload, AlertTriangle, Volume2, StopCircle } from 'lucide-react';
 import { analyzeImage, analyzeText } from '../services/multiProviderChatService';
+import { useTranslation } from 'react-i18next';
 
 type AnalysisType = 'image' | 'text';
 
@@ -22,6 +23,7 @@ const fileToBase64 = async (file: File): Promise<{ data: string; mimeType: strin
 };
 
 export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ category }) => {
+  const { t } = useTranslation(['common']);
   const [analysisType, setAnalysisType] = useState<AnalysisType>('image');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -56,7 +58,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 4 * 1024 * 1024) {
-        setError('圖片大小不應超過 4MB');
+        setError(t('common:messages.fileSizeLimit'));
         return;
       }
       setError('');
@@ -83,18 +85,18 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
       } else if (analysisType === 'text' && inputText.trim()) {
         analysisResult = await analyzeText(inputText, context, wordLimit);
       } else {
-        setError('請提供分析的輸入內容');
+        setError(t('common:messages.pleaseProvideInput'));
         setIsLoading(false);
         return;
       }
       setResult(analysisResult);
     } catch (err) {
-      console.error('分析失敗:', err);
-      setError('分析過程中發生錯誤，請檢查 API 設定或稍後再試');
+      console.error(t('common:messages.analysisFailed'), err);
+      setError(t('common:messages.analysisError'));
     } finally {
       setIsLoading(false);
     }
-  }, [analysisType, imageFile, inputText, category]);
+  }, [analysisType, imageFile, inputText, category, t]);
 
   const handleExpand = useCallback(async () => {
     await handleAnalysis(true);
@@ -109,7 +111,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
 
   const speakText = useCallback((text: string) => {
     if (!('speechSynthesis' in window)) {
-      setError('您的瀏覽器不支援語音播放功能');
+      setError(t('common:messages.speechNotSupported'));
       return;
     }
 
@@ -131,11 +133,11 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
 
     utterance.onerror = () => {
       setIsSpeaking(false);
-      setError('語音播放失敗');
+      setError(t('common:messages.speechFailed'));
     };
 
     window.speechSynthesis.speak(utterance);
-  }, []);
+  }, [t]);
 
   const stopSpeaking = useCallback(() => {
     window.speechSynthesis.cancel();
@@ -163,7 +165,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
           }`}
         >
           <ImageIcon className="w-5 h-5" />
-          <span className="font-semibold">圖片分析</span>
+          <span className="font-semibold">{t('common:labels.imageAnalysis')}</span>
         </button>
         <button
           onClick={() => setAnalysisType('text')}
@@ -174,7 +176,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
           }`}
         >
           <FileText className="w-5 h-5" />
-          <span className="font-semibold">文字分析</span>
+          <span className="font-semibold">{t('common:labels.textAnalysis')}</span>
         </button>
       </div>
 
@@ -183,7 +185,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
         {analysisType === 'image' ? (
           <div className="space-y-4">
             <label htmlFor="image-upload" className="block text-lg font-medium text-gray-800">
-              上傳圖片
+              {t('common:labels.uploadImage')}
             </label>
             <div className="mt-2 flex justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 py-10 hover:border-indigo-500 transition-colors cursor-pointer">
               <div className="text-center">
@@ -197,7 +199,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
                         htmlFor="image-upload"
                         className="relative cursor-pointer rounded-md font-semibold text-indigo-600 hover:text-indigo-500"
                       >
-                        <span>點擊上傳</span>
+                        <span>{t('common:buttons.clickToUpload')}</span>
                         <input
                           id="image-upload"
                           name="image-upload"
@@ -207,9 +209,9 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
                           accept="image/*"
                         />
                       </label>
-                      <p className="pl-1">或拖放檔案至此</p>
+                      <p className="pl-1">{t('common:messages.dragDropHint')}</p>
                     </div>
-                    <p className="text-xs leading-5 text-gray-600">PNG, JPG, GIF 最大 4MB</p>
+                    <p className="text-xs leading-5 text-gray-600">{t('common:messages.fileFormats')}</p>
                   </>
                 )}
                 {!imagePreview && (
@@ -224,12 +226,12 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
                 )}
               </div>
             </div>
-            {imageFile && <p className="text-sm text-gray-600 text-center">已選擇: {imageFile.name}</p>}
+            {imageFile && <p className="text-sm text-gray-600 text-center">{t('common:messages.fileSelected')} {imageFile.name}</p>}
           </div>
         ) : (
           <div className="space-y-4">
             <label htmlFor="text-input" className="block text-lg font-medium text-gray-800">
-              輸入要分析的文字
+              {t('common:labels.textToAnalyze')}
             </label>
             <textarea
               id="text-input"
@@ -237,7 +239,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               className="w-full bg-gray-50 p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
-              placeholder="輸入文字、引文、或描述..."
+              placeholder={t('common:placeholders.enterText')}
             />
           </div>
         )}
@@ -247,7 +249,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
             disabled={!canAnalyze || isLoading}
             className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-indigo-700 text-white font-bold rounded-lg shadow-md hover:from-indigo-600 hover:to-indigo-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105"
           >
-            {isLoading ? '分析中...' : '開始分析'}
+            {isLoading ? t('common:buttons.analyzing') : t('common:buttons.startAnalysis')}
           </button>
         </div>
       </div>
@@ -257,9 +259,9 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
         <div ref={resultRef} className="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold text-gray-800">
-              分析結果
+              {t('common:labels.analysisResult')}
               {result && !isExpanded && (
-                <span className="text-sm font-normal text-gray-500 ml-2">(限 100 字)</span>
+                <span className="text-sm font-normal text-gray-500 ml-2">{t('common:messages.wordLimit')}</span>
               )}
             </h3>
             {result && (
@@ -270,7 +272,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
                     ? 'bg-red-500 hover:bg-red-600 text-white'
                     : 'bg-indigo-500 hover:bg-indigo-600 text-white'
                 }`}
-                title={isSpeaking ? '停止播放' : '朗讀結果'}
+                title={isSpeaking ? t('common:buttons.stopPlaying') : t('common:buttons.readAloud')}
               >
                 {isSpeaking ? <StopCircle className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
               </button>
@@ -298,7 +300,7 @@ export const ModelContextProtocol: React.FC<ModelContextProtocolProps> = ({ cate
                     onClick={handleExpand}
                     className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                   >
-                    展開更多詳情 (500 字)
+                    {t('common:buttons.expand')}
                   </button>
                 </div>
               )}
