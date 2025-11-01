@@ -1,5 +1,5 @@
 import React from 'react';
-import { Utensils, Footprints, Headphones, Eye, BookOpen, Heart } from 'lucide-react';
+import { Utensils, Footprints, Headphones, Eye, BookOpen, Heart, Home } from 'lucide-react';
 import type { CultureCategory } from '../types';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
@@ -94,8 +94,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       />
 
       <div className="relative z-10">
-      {/* Language Switcher */}
-      <div className="flex justify-end mb-6 px-4">
+      {/* Platform Link and Language Switcher */}
+      <div className="flex justify-between items-center mb-6 px-4">
+        <a
+          href="https://christianityplatform.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-white backdrop-blur-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-gray-800 hover:text-rose-600 font-medium group"
+        >
+          <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          <span>{t('landing:platformLink')}</span>
+        </a>
         <LanguageSwitcher />
       </div>
 
