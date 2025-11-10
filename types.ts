@@ -52,11 +52,15 @@ export interface AudioContent {
   title: string;
   titleEn: string;
   description: string;
+  descriptionEn?: string;
   type: 'hymn' | 'chant' | 'sermon' | 'prayer' | 'meditation';
   audioUrl: string;
+  audioUrlEn?: string;
   duration: string;
   transcript?: string;
+  transcriptEn?: string;
   background: string;
+  backgroundEn?: string;
 }
 
 export interface VisualContent {
