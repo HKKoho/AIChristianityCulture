@@ -97,7 +97,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* Platform Link and Language Switcher */}
       <div className="flex justify-between items-center mb-6 px-4">
         <a
-          href="https://christianityplatform.vercel.app/"
+          href="https://christianplatform.vercel.app/"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-white backdrop-blur-sm rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-gray-800 hover:text-rose-600 font-medium group"
